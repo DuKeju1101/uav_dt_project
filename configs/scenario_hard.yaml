@@ -1,0 +1,107 @@
+seed: 42
+num_seeds: 12
+episode_length: 140
+delta_t: 1.0
+
+area:
+  width: 500.0
+  height: 500.0
+
+height_uav: 100.0
+
+bs:
+  x: 250.0
+  y: 250.0
+
+users:
+  positions:
+    - [90.0, 90.0]
+    - [405.0, 100.0]
+    - [260.0, 430.0]
+
+uav1:
+  start: [150.0, 250.0]
+
+uav2:
+  start: [350.0, 250.0]
+
+eve:
+  mode: mobile
+  start: [250.0, 240.0]
+  velocity: [-7.0, -3.0]
+  speed_noise_std: 1.2
+
+sync:
+  budget: 20
+  full_sync_cost: 1.0
+  delay_slots: 2
+  failure_prob: 0.10
+  random_sync_prob: 0.30
+  aoi_threshold: 4
+  periodic_k: 6
+  risk_threshold: 0.45
+  rho: 0.08
+  tau0: 0.42
+  tau_budget_eta: 0.45
+  sigma0: 4.0
+  sigma_growth: 1.6
+
+channel:
+  beta0: 1.0
+  path_loss_exp: 2.4
+  noise_power: 1.0e-06
+  xi_legit_interference: 0.22
+  r_min: 2.9
+
+control:
+  step_size: 10.0
+  p_s_levels:
+    - 0.5
+    - 1.0
+  p_j_levels:
+    - 0.0
+    - 0.5
+  lambda_move: 0.002
+  lambda_power: 0.01
+  lambda_sync: 0.035
+  lambda_outage: 0.90
+  lambda_certificate: 0.24
+  lambda_pending_sync: 0.05
+  lambda_badness: 0.14
+  lambda_margin: 0.05
+  rollout_horizon: 4
+  rollout_gamma: 0.93
+  rollout_branching: 18
+  max_candidates: 324
+  allowed_moves:
+    - stay
+    - up
+    - down
+    - left
+    - right
+
+metrics:
+  a_max: 20.0
+  d_max: 220.0
+  sigma_max: 60.0
+  q_weights:
+    - 0.35
+    - 0.45
+    - 0.20
+
+threshold:
+  kappa:
+    - 0.017
+    - 0.021
+    - 0.009
+  w_risk:
+    - 0.22
+    - 0.33
+    - 0.20
+    - 0.25
+
+theory:
+  margin_coeffs:
+    - 0.022
+    - 0.0025
+    - 0.014

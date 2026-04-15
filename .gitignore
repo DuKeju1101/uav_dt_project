@@ -1,0 +1,22 @@
+# Local environments
+.venv/
+venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local tool marker
+.codex
+
+# Windows zone identifier artifacts
+*:Zone.Identifier
