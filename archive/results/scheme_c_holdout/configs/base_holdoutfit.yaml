@@ -1,0 +1,171 @@
+seed: 42
+num_seeds: 10
+episode_length: 120
+delta_t: 1.0
+area:
+  width: 500.0
+  height: 500.0
+height_uav: 100.0
+bs:
+  x: 250.0
+  y: 250.0
+users:
+  positions:
+  - - 100.0
+    - 120.0
+  - - 380.0
+    - 120.0
+  - - 250.0
+    - 400.0
+uav1:
+  start:
+  - 180.0
+  - 260.0
+uav2:
+  start:
+  - 320.0
+  - 260.0
+eve:
+  mode: adaptive_mobile
+  start:
+  - 235.0
+  - 250.0
+  velocity:
+  - -5.0
+  - -2.0
+  max_speed: 5.5
+  speed_noise_std: 0.8
+sync:
+  budget: 28.0
+  full_sync_cost: 1.0
+  bandwidth_min: 0.25
+  bandwidth_max: 1.0
+  bandwidth_levels:
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1.0
+  default_bandwidth: 0.75
+  delay_slots: 1
+  failure_prob: 0.05
+  random_sync_prob: 0.35
+  aoi_threshold: 5
+  periodic_k: 7
+  risk_threshold: 0.4
+  rho: 0.12
+  tau0: 0.4
+  tau_budget_eta: 0.38
+  sigma0: 3.8
+  sigma_growth: 1.35
+  kalman_velocity_sigma0: 1.8
+  kalman_process_accel_std: 0.8
+  measurement_std_at_max_bw: 1.1
+channel:
+  beta0: 1.0
+  path_loss_exp: 2.35
+  noise_power: 1.0e-06
+  xi_legit_interference: 0.18
+  r_min: 2.55
+  use_probabilistic_los: true
+  los_a: 9.61
+  los_b: 0.16
+  eta_los_db: 1.0
+  eta_nlos_db: 18.0
+  fading_los_mean: 1.0
+  fading_nlos_mean: 1.0
+control:
+  step_size: 10.0
+  p_s_levels:
+  - 0.35
+  - 0.5
+  - 0.65
+  - 0.8
+  - 1.0
+  p_j_levels:
+  - 0.0
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1.0
+  lambda_move: 0.002
+  lambda_power: 0.01
+  lambda_sync: 0.03
+  lambda_outage: 0.75
+  lambda_certificate: 0.2
+  lambda_pending_sync: 0.04
+  lambda_badness: 0.1
+  lambda_margin: 0.04
+  rollout_horizon: 1
+  rollout_gamma: 0.92
+  rollout_branching: 6
+  rollout_deep_branching: 2
+  rollout_tail_branching: 1
+  rollout_move_candidates: 5
+  rollout_power_candidates: 3
+  greedy_move_candidates: 5
+  greedy_power_candidates: 3
+  max_candidates: 10125
+  allowed_moves:
+  - stay
+  - up
+  - down
+  - left
+  - right
+  - up_left
+  - up_right
+  - down_left
+  - down_right
+metrics:
+  a_max: 20.0
+  d_max: 200.0
+  sigma_max: 50.0
+  q_weights:
+  - 0.35
+  - 0.45
+  - 0.2
+threshold:
+  kappa:
+  - 0.014
+  - 0.017
+  - 0.007
+  w_risk:
+  - 0.22
+  - 0.33
+  - 0.2
+  - 0.25
+theory:
+  loss_model:
+    model_type: split_conformal_upper
+    feature_names:
+    - bias
+    - aoi_norm
+    - pred_error_radius_norm
+    - sigma_norm
+    - sync_delay
+    - failure_prob
+    - aoi_x_radius
+    - radius_x_sigma
+    - aoi_x_sigma
+    - delay_x_radius
+    - delay_x_sigma
+    coefficients:
+      bias: 0.0
+      aoi_norm: 4.2392861080175
+      pred_error_radius_norm: 0.0
+      sigma_norm: 0.0
+      sync_delay: 0.0
+      failure_prob: 1.7543886950669854
+      aoi_x_radius: 0.0
+      radius_x_sigma: 0.029173043785514816
+      aoi_x_sigma: 0.09879872848180578
+      delay_x_radius: 0.4348558038144489
+      delay_x_sigma: 0.0
+    intercept: 0.0
+    alpha: 0.05
+    calibration_ratio: 0.2
+    nonconformity_quantile: 0.0
+    safety_scale: 1.0
+  feature_scales:
+    aoi: 20.0
+    pred_error_radius: 200.0
+    sigma: 50.0

@@ -44,15 +44,37 @@ class Eve(PointEntity):
 
 @dataclass
 class TwinState:
-    eve_est: np.ndarray
-    eve_vel_est: np.ndarray
-    sigma: float
+    state: np.ndarray
+    covariance: np.ndarray
     aoi: int
+    last_sync_bandwidth: float = 0.0
+
+    @property
+    def eve_est(self) -> np.ndarray:
+        return self.state[:2]
+
+    @eve_est.setter
+    def eve_est(self, value: np.ndarray) -> None:
+        self.state[:2] = np.asarray(value, dtype=float)
+
+    @property
+    def eve_vel_est(self) -> np.ndarray:
+        return self.state[2:]
+
+    @eve_vel_est.setter
+    def eve_vel_est(self, value: np.ndarray) -> None:
+        self.state[2:] = np.asarray(value, dtype=float)
+
+    @property
+    def sigma(self) -> float:
+        pos_cov = self.covariance[:2, :2]
+        eigvals = np.linalg.eigvalsh(pos_cov)
+        return float(np.sqrt(max(float(np.max(eigvals)), 0.0)))
 
     def copy(self) -> "TwinState":
         return TwinState(
-            eve_est=self.eve_est.copy(),
-            eve_vel_est=self.eve_vel_est.copy(),
-            sigma=float(self.sigma),
+            state=self.state.copy(),
+            covariance=self.covariance.copy(),
             aoi=int(self.aoi),
+            last_sync_bandwidth=float(self.last_sync_bandwidth),
         )

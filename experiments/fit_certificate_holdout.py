@@ -9,7 +9,7 @@ import pandas as pd
 import yaml
 
 from experiments.common import ROOT, load_config, run_single_episode
-from experiments.fit_certificate_model import FEATURE_NAMES, build_feature_frame
+from experiments.fit_certificate_model import FEATURE_NAMES, build_feature_frame, fit_split_conformal_upper
 
 
 def _collect_traces(config_paths: list[str], methods: list[str], num_seeds: int, seed_start: int = 0) -> tuple[pd.DataFrame, dict[str, dict[str, float]]]:
@@ -37,30 +37,11 @@ def _collect_traces(config_paths: list[str], methods: list[str], num_seeds: int,
     return pd.concat(frames, ignore_index=True), feature_scales
 
 
-def _fit_nonnegative_ridge(train_df: pd.DataFrame, ridge: float, residual_quantile: float, safety_scale: float) -> dict:
-    x = np.nan_to_num(train_df[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
-    y = np.nan_to_num(train_df["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
-    xtx = x.T @ x + ridge * np.eye(x.shape[1])
-    xty = x.T @ y
-    beta = np.linalg.solve(xtx, xty)
-    beta = np.maximum(beta, 0.0)
-    pred = x @ beta
-    positive_residual = np.maximum(y - pred, 0.0)
-    q = float(np.quantile(positive_residual, residual_quantile))
-    return {
-        "feature_names": FEATURE_NAMES,
-        "coefficients": {name: float(val) for name, val in zip(FEATURE_NAMES, beta)},
-        "intercept": 0.0,
-        "residual_quantile": q,
-        "safety_scale": float(safety_scale),
-    }
-
-
 def _evaluate(df: pd.DataFrame, model: dict, split: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     x = np.nan_to_num(df[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
     beta = np.array([float(model["coefficients"][name]) for name in FEATURE_NAMES], dtype=float)
     pred = np.maximum(x @ beta + float(model.get("intercept", 0.0)), 0.0)
-    upper = pred + float(model.get("safety_scale", 1.0)) * float(model.get("residual_quantile", 0.0))
+    upper = pred + float(model.get("nonconformity_quantile", model.get("residual_quantile", 0.0)))
     loss = df["realized_loss"].to_numpy(dtype=float)
     eval_df = df[["scenario", "method", "seed", "realized_loss"]].copy()
     eval_df["predicted_loss"] = pred
@@ -120,8 +101,8 @@ def main() -> None:
     parser.add_argument("--eval-seeds", type=int, default=1)
     parser.add_argument("--eval-seed-start", type=int, default=20)
     parser.add_argument("--ridge", type=float, default=1e-6)
-    parser.add_argument("--residual-quantile", type=float, default=0.95)
-    parser.add_argument("--safety-scale", type=float, default=1.1)
+    parser.add_argument("--alpha", type=float, default=0.05)
+    parser.add_argument("--calibration-ratio", type=float, default=0.2)
     args = parser.parse_args()
 
     outdir = Path(args.outdir)
@@ -132,12 +113,13 @@ def main() -> None:
     train_df.to_csv(outdir / "holdout_train_traces.csv", index=False)
     eval_df.to_csv(outdir / "holdout_eval_traces.csv", index=False)
 
-    model = _fit_nonnegative_ridge(
-        train_df=train_df,
+    model, split_df = fit_split_conformal_upper(
+        df=train_df,
         ridge=float(args.ridge),
-        residual_quantile=float(args.residual_quantile),
-        safety_scale=float(args.safety_scale),
+        alpha=float(args.alpha),
+        calibration_ratio=float(args.calibration_ratio),
     )
+    split_df.to_csv(outdir / "holdout_train_splits.csv", index=False)
     pd.DataFrame(
         {"feature": FEATURE_NAMES, "coefficient": [float(model["coefficients"][name]) for name in FEATURE_NAMES]}
     ).to_csv(outdir / "holdout_model_coefficients.csv", index=False)

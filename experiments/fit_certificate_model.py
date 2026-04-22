@@ -45,6 +45,55 @@ def build_feature_frame(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     return out.replace([np.inf, -np.inf], np.nan).fillna(0.0)
 
 
+def fit_split_conformal_upper(
+    df: pd.DataFrame,
+    ridge: float,
+    alpha: float,
+    calibration_ratio: float,
+) -> tuple[dict, pd.DataFrame]:
+    shuffled = df.sample(frac=1.0, random_state=0).reset_index(drop=True)
+    calib_size = max(1, int(len(shuffled) * calibration_ratio))
+    if calib_size >= len(shuffled):
+        calib_size = max(1, len(shuffled) // 5)
+    train_core = shuffled.iloc[:-calib_size].copy() if len(shuffled) > calib_size else shuffled.copy()
+    calib = shuffled.iloc[-calib_size:].copy()
+
+    x_train = np.nan_to_num(train_core[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    y_train = np.nan_to_num(train_core["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    xtx = x_train.T @ x_train + ridge * np.eye(x_train.shape[1])
+    xty = x_train.T @ y_train
+    beta = np.linalg.solve(xtx, xty)
+    beta = np.maximum(beta, 0.0)
+
+    x_calib = np.nan_to_num(calib[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    y_calib = np.nan_to_num(calib["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    calib_pred = np.maximum(x_calib @ beta, 0.0)
+    nonconformity = np.maximum(y_calib - calib_pred, 0.0)
+    q_level = min(1.0, np.ceil((len(nonconformity) + 1) * (1.0 - alpha)) / max(len(nonconformity), 1))
+    qhat = float(np.quantile(nonconformity, q_level, method="higher"))
+
+    model_dict = {
+        "model_type": "split_conformal_upper",
+        "feature_names": FEATURE_NAMES,
+        "coefficients": {name: float(val) for name, val in zip(FEATURE_NAMES, beta)},
+        "intercept": 0.0,
+        "alpha": float(alpha),
+        "calibration_ratio": float(calibration_ratio),
+        "nonconformity_quantile": qhat,
+        "safety_scale": 1.0,
+    }
+
+    split_df = pd.DataFrame(
+        {
+            "split": ["train"] * len(train_core) + ["calibration"] * len(calib),
+            "scenario": list(train_core["scenario"]) + list(calib["scenario"]),
+            "method": list(train_core["method"]) + list(calib["method"]),
+            "seed": list(train_core["seed"]) + list(calib["seed"]),
+        }
+    )
+    return model_dict, split_df
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -59,8 +108,9 @@ def main() -> None:
     parser.add_argument("--outdir", type=str, default=str(ROOT / "results" / "certificate_fit"))
     parser.add_argument("--out-configs-dir", type=str, default=str(ROOT / "configs"))
     parser.add_argument("--num-seeds", type=int, default=3)
-    parser.add_argument("--residual-quantile", type=float, default=0.95)
-    parser.add_argument("--safety-scale", type=float, default=1.1)
+    parser.add_argument("--alpha", type=float, default=0.05)
+    parser.add_argument("--calibration-ratio", type=float, default=0.2)
+    parser.add_argument("--ridge", type=float, default=1e-6)
     parser.add_argument("--methods", nargs="+", default=["periodic", "security_risk", "aoi_only", "rollout_joint"])
     args = parser.parse_args()
 
@@ -94,44 +144,35 @@ def main() -> None:
 
     train_df = pd.concat(trace_frames, ignore_index=True)
     train_df.to_csv(outdir / "certificate_fit_traces.csv", index=False)
-
-    x = np.nan_to_num(train_df[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
-    y = np.nan_to_num(train_df["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
-    ridge = 1e-6
-    xtx = x.T @ x + ridge * np.eye(x.shape[1])
-    xty = x.T @ y
-    beta = np.linalg.solve(xtx, xty)
-    beta = np.maximum(beta, 0.0)
-    pred = x @ beta
-    positive_residual = np.maximum(y - pred, 0.0)
-    residual_quantile = float(np.quantile(positive_residual, args.residual_quantile))
+    model_dict, split_df = fit_split_conformal_upper(
+        train_df,
+        ridge=float(args.ridge),
+        alpha=float(args.alpha),
+        calibration_ratio=float(args.calibration_ratio),
+    )
+    split_df.to_csv(outdir / "certificate_fit_splits.csv", index=False)
 
     summary = pd.DataFrame(
         {
             "feature": FEATURE_NAMES,
-            "coefficient": beta,
+            "coefficient": [float(model_dict["coefficients"][name]) for name in FEATURE_NAMES],
         }
     )
     summary.to_csv(outdir / "certificate_fit_coefficients.csv", index=False)
 
-    model_dict = {
-        "feature_names": FEATURE_NAMES,
-        "coefficients": {name: float(val) for name, val in zip(FEATURE_NAMES, beta)},
-        "intercept": 0.0,
-        "residual_quantile": residual_quantile,
-        "safety_scale": float(args.safety_scale),
-    }
-
     metrics_rows = []
-    pred_upper = np.maximum(pred, 0.0) + args.safety_scale * residual_quantile
+    x = np.nan_to_num(train_df[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    pred = np.maximum(x @ np.array([float(model_dict["coefficients"][name]) for name in FEATURE_NAMES], dtype=float), 0.0)
+    y = np.nan_to_num(train_df["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    pred_upper = pred + float(model_dict["nonconformity_quantile"])
     cover_rate = float(np.mean(pred_upper >= y))
     mean_gap = float(np.mean(pred_upper - y))
     metrics_rows.append(
         {
             "cover_rate": cover_rate,
             "mean_upper_minus_loss": mean_gap,
-            "residual_quantile": residual_quantile,
-            "safety_scale": float(args.safety_scale),
+            "alpha": float(model_dict["alpha"]),
+            "nonconformity_quantile": float(model_dict["nonconformity_quantile"]),
         }
     )
     pd.DataFrame(metrics_rows).to_csv(outdir / "certificate_fit_metrics.csv", index=False)

@@ -7,7 +7,7 @@ import numpy as np
 
 from .entities import Eve, PointEntity, UAV, User, TwinState
 from .mobility import apply_move, clip_area
-from .channel import best_user_metrics
+from .channel import best_eve_interception_rate, best_user_metrics
 from .twin import TwinConfig, TwinTracker, predicted_error_radius, twin_quality
 from .sync import robust_secrecy_certificate, secrecy_loss_upper_bound
 
@@ -32,11 +32,21 @@ class UAVSecurityEnv:
         self.twin_tracker = TwinTracker(
             TwinConfig(
                 sigma0=float(self.cfg["sync"]["sigma0"]),
-                sigma_growth=float(self.cfg["sync"]["sigma_growth"]),
+                velocity_sigma0=float(
+                    self.cfg["sync"].get("kalman_velocity_sigma0", self.cfg["sync"].get("sigma_growth", 1.0))
+                ),
                 area=self.area,
                 delta_t=self.delta_t,
+                process_accel_std=float(self.cfg["sync"].get("kalman_process_accel_std", 1.0)),
+                measurement_std_at_max_bw=float(self.cfg["sync"].get("measurement_std_at_max_bw", 1.0)),
+                bandwidth_max=float(self.cfg["sync"].get("bandwidth_max", 1.0)),
+                bandwidth_min=float(self.cfg["sync"].get("bandwidth_min", 0.25)),
             )
         )
+        self.bandwidth_max = float(self.cfg["sync"].get("bandwidth_max", 1.0))
+        self.bandwidth_min = float(self.cfg["sync"].get("bandwidth_min", 0.25))
+        self.default_bandwidth = float(self.cfg["sync"].get("default_bandwidth", self.bandwidth_max))
+        self.total_sync_budget = float(self.cfg["sync"]["budget"])
         self.rng = np.random.default_rng(int(self.cfg.get("seed", 42)))
         self.reset(seed=int(self.cfg.get("seed", 42)))
 
@@ -44,7 +54,7 @@ class UAVSecurityEnv:
         if seed is not None:
             self.rng = np.random.default_rng(seed)
         self.slot = 0
-        self.remaining_budget = int(self.cfg["sync"]["budget"])
+        self.remaining_budget = float(self.total_sync_budget)
         self.total_sync_cost = 0.0
         self.sync_count = 0
         self.uav1 = UAV("uav1", np.array(self.cfg["uav1"]["start"], dtype=float))
@@ -59,7 +69,7 @@ class UAVSecurityEnv:
         self.true_eve_history = [self.eve.position.copy()]
         self.twin = self.twin_tracker.initialize(self.eve)
         self.history: List[Dict[str, Any]] = []
-        self.pending_syncs: List[int] = []
+        self.pending_syncs: List[Dict[str, float]] = []
         return self.get_observation()
 
     def clone_state(self) -> Dict[str, Any]:
@@ -77,7 +87,7 @@ class UAVSecurityEnv:
             "uav2_history": [p.copy() for p in self.uav2.history],
             "true_eve_history": [p.copy() for p in self.true_eve_history],
             "history": [dict(row) for row in self.history],
-            "pending_syncs": list(self.pending_syncs),
+            "pending_syncs": [dict(item) for item in self.pending_syncs],
             "rng_state": copy.deepcopy(self.rng.bit_generator.state),
         }
 
@@ -95,7 +105,7 @@ class UAVSecurityEnv:
         self.uav2.history = [p.copy() for p in state["uav2_history"]]
         self.true_eve_history = [p.copy() for p in state["true_eve_history"]]
         self.history = [dict(row) for row in state["history"]]
-        self.pending_syncs = list(state["pending_syncs"])
+        self.pending_syncs = [dict(item) for item in state["pending_syncs"]]
         self.rng.bit_generator.state = copy.deepcopy(state["rng_state"])
 
     def get_observation(self) -> Dict[str, Any]:
@@ -148,7 +158,8 @@ class UAVSecurityEnv:
             "twin_eve_pos": self.twin.eve_est.copy(),
             "twin_sigma": float(self.twin.sigma),
             "aoi": int(self.twin.aoi),
-            "remaining_budget": int(self.remaining_budget),
+            "remaining_budget": float(self.remaining_budget),
+            "remaining_budget_ratio": float(self.remaining_budget / max(self.total_sync_budget, 1e-12)),
             "twin_quality": q["quality"],
             "twin_badness": q["badness"],
             "pred_error_radius": pred_radius,
@@ -160,6 +171,8 @@ class UAVSecurityEnv:
             "cert_slack": float(certificate["certificate_slack"]),
             "certified_safe": int(certificate["certified"]),
             "pending_syncs": int(len(self.pending_syncs)),
+            "last_sync_bandwidth": float(self.twin.last_sync_bandwidth),
+            "bandwidth_max": float(self.bandwidth_max),
         }
         return obs
 
@@ -177,26 +190,109 @@ class UAVSecurityEnv:
             alpha=float(self.cfg["channel"]["path_loss_exp"]),
             noise_power=float(self.cfg["channel"]["noise_power"]),
             xi_legit_interference=float(self.cfg["channel"]["xi_legit_interference"]),
+            channel_cfg=self.cfg["channel"],
         )
 
-    def _project_twin_state(self, do_sync: bool, pending_matures_next: bool, sync_delay: int) -> tuple[int, float, int]:
-        next_pending = len(self.pending_syncs)
-        if pending_matures_next and next_pending > 0:
-            next_pending -= 1
+    def _resolve_sync_bandwidth(self, action: Dict[str, Any]) -> float:
+        if not bool(action.get("sync", False)):
+            return 0.0
+        requested = float(action.get("sync_bandwidth", self.default_bandwidth))
+        if requested <= 0.0:
+            return 0.0
+        if self.remaining_budget + 1e-12 < self.bandwidth_min:
+            return 0.0
+        return float(np.clip(requested, self.bandwidth_min, min(self.bandwidth_max, self.remaining_budget)))
 
-        if pending_matures_next:
-            next_aoi = 0
-            next_sigma = float(self.cfg["sync"]["sigma0"])
-        elif do_sync and sync_delay == 0:
-            next_aoi = 0
-            next_sigma = float(self.cfg["sync"]["sigma0"])
-        else:
-            next_aoi = self.twin.aoi + 1
-            next_sigma = self.twin.sigma + float(self.cfg["sync"]["sigma_growth"])
+    def _predict_next_eve_position(
+        self,
+        uav1_pos: np.ndarray,
+        uav2_pos: np.ndarray,
+        p_s: float,
+        p_j: float,
+    ) -> np.ndarray:
+        eve_mode = str(self.cfg["eve"].get("mode", "mobile"))
+        if eve_mode not in {"adaptive", "adaptive_mobile"}:
+            return clip_area(self.eve.position + self.eve.velocity * self.delta_t, self.area)
 
-        if do_sync and sync_delay > 0:
-            next_pending += 1
-        return int(next_aoi), float(next_sigma), int(next_pending)
+        move_names = list(
+            self.cfg["eve"].get(
+                "adaptive_moves",
+                ["stay", "up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"],
+            )
+        )
+        max_speed = float(
+            self.cfg["eve"].get(
+                "max_speed",
+                max(np.linalg.norm(self.eve.velocity), 1.0),
+            )
+        )
+        step_size = max_speed * self.delta_t
+        best_pos = self.eve.position.copy()
+        best_score = None
+        for move_name in move_names:
+            candidate_pos = apply_move(self.eve.position.copy(), move_name, step_size, self.area)
+            score = best_eve_interception_rate(
+                uav1_pos=uav1_pos,
+                uav2_pos=uav2_pos,
+                eve_pos=candidate_pos,
+                user_positions=self.user_positions,
+                p_s=p_s,
+                p_j=p_j,
+                height=self.height,
+                beta0=float(self.cfg["channel"]["beta0"]),
+                alpha=float(self.cfg["channel"]["path_loss_exp"]),
+                noise_power=float(self.cfg["channel"]["noise_power"]),
+                channel_cfg=self.cfg["channel"],
+            )
+            if best_score is None or score > best_score:
+                best_score = score
+                best_pos = candidate_pos
+        return clip_area(best_pos, self.area)
+
+    def _project_pending_queue(
+        self,
+        queue: List[Dict[str, float]],
+    ) -> tuple[list[float], list[Dict[str, float]]]:
+        matured_bandwidths: list[float] = []
+        updated_queue: list[Dict[str, float]] = []
+        for item in queue:
+            new_steps_left = float(item["steps_left"]) - 1.0
+            if new_steps_left <= 0.0:
+                matured_bandwidths.append(float(item["bandwidth"]))
+            else:
+                updated_queue.append({"steps_left": new_steps_left, "bandwidth": float(item["bandwidth"])})
+        return matured_bandwidths, updated_queue
+
+    def _project_next_twin(
+        self,
+        next_true_eve: np.ndarray,
+        do_sync: bool,
+        sync_bandwidth: float,
+        use_true_eve: bool = False,
+    ) -> tuple[TwinState, list[Dict[str, float]], bool]:
+        projected_twin = self.twin.copy()
+        matured_bandwidths, next_pending_queue = self._project_pending_queue(self.pending_syncs)
+        sync_applied = False
+
+        if matured_bandwidths:
+            applied_bw = max(matured_bandwidths)
+            projected_twin = self.twin_tracker.expected_sync(projected_twin, next_true_eve, applied_bw)
+            sync_applied = True
+
+        sync_delay = int(self.cfg["sync"].get("delay_slots", 0))
+        if do_sync and sync_bandwidth > 0.0:
+            if sync_delay <= 0:
+                projected_twin = self.twin_tracker.expected_sync(projected_twin, next_true_eve, sync_bandwidth)
+                sync_applied = True
+            else:
+                next_pending_queue.append({"steps_left": float(sync_delay), "bandwidth": float(sync_bandwidth)})
+
+        if not sync_applied:
+            projected_twin = self.twin_tracker.predict(projected_twin)
+
+        if use_true_eve:
+            projected_twin.eve_est = next_true_eve.copy()
+        return projected_twin, next_pending_queue, sync_applied
 
     def evaluate_candidate(
         self,
@@ -208,29 +304,19 @@ class UAVSecurityEnv:
         move2 = action.get("move_uav2", "stay")
         p_s = float(action.get("p_s", 1.0))
         p_j = float(action.get("p_j", 0.8))
-        do_sync = bool(action.get("sync", False)) and self.remaining_budget > 0
-        sync_delay = int(self.cfg["sync"].get("delay_slots", 0))
-        pending_matures_next = bool(self.pending_syncs) and min(self.pending_syncs) <= 1
+        sync_bandwidth = self._resolve_sync_bandwidth(action)
+        do_sync = sync_bandwidth > 0.0
 
         next_uav1 = apply_move(self.uav1.position.copy(), move1, float(self.cfg["control"]["step_size"]), self.area)
         next_uav2 = apply_move(self.uav2.position.copy(), move2, float(self.cfg["control"]["step_size"]), self.area)
-        next_true_eve = clip_area(self.eve.position + self.eve.velocity * self.delta_t, self.area)
-        next_aoi, next_sigma, next_pending = self._project_twin_state(
+        next_true_eve = self._predict_next_eve_position(next_uav1, next_uav2, p_s, p_j)
+        projected_twin, next_pending_queue, _ = self._project_next_twin(
+            next_true_eve=next_true_eve,
             do_sync=do_sync,
-            pending_matures_next=pending_matures_next,
-            sync_delay=sync_delay,
+            sync_bandwidth=sync_bandwidth,
+            use_true_eve=use_true_eve,
         )
-
-        if use_true_eve:
-            est_eve = next_true_eve
-            next_aoi = 0
-            next_sigma = float(self.cfg["sync"]["sigma0"])
-        elif pending_matures_next:
-            est_eve = next_true_eve
-        elif do_sync and sync_delay == 0:
-            est_eve = next_true_eve
-        else:
-            est_eve = clip_area(self.twin.eve_est + self.twin.eve_vel_est * self.delta_t, self.area)
+        est_eve = projected_twin.eve_est.copy()
 
         pred_metrics = best_user_metrics(
             uav1_pos=next_uav1,
@@ -244,21 +330,22 @@ class UAVSecurityEnv:
             alpha=float(self.cfg["channel"]["path_loss_exp"]),
             noise_power=float(self.cfg["channel"]["noise_power"]),
             xi_legit_interference=float(self.cfg["channel"]["xi_legit_interference"]),
+            channel_cfg=self.cfg["channel"],
         )
         movement_cost = float(np.linalg.norm(next_uav1 - self.uav1.position) + np.linalg.norm(next_uav2 - self.uav2.position))
         power_cost = p_s + p_j
-        sync_cost = float(self.cfg["sync"]["full_sync_cost"]) if do_sync and include_sync_penalty else 0.0
+        sync_cost = float(sync_bandwidth) if do_sync and include_sync_penalty else 0.0
         r_min = float(self.cfg["channel"]["r_min"])
         pred_margin = pred_metrics["r_sec"] - r_min
         pred_radius = predicted_error_radius(
-            aoi=next_aoi,
+            aoi=projected_twin.aoi,
             v_max=float(np.linalg.norm(self.eve.velocity) + 3 * self.cfg["eve"].get("speed_noise_std", 0.0)),
             delta_t=self.delta_t,
         )
         cert = robust_secrecy_certificate(
-            aoi=next_aoi,
+            aoi=projected_twin.aoi,
             pred_error_radius=pred_radius,
-            sigma=next_sigma,
+            sigma=projected_twin.sigma,
             predicted_margin=pred_margin,
             rho=float(self.cfg["sync"]["rho"]),
             sync_delay=int(self.cfg["sync"].get("delay_slots", 0)),
@@ -272,9 +359,9 @@ class UAVSecurityEnv:
             },
         )
         projected_badness = twin_quality(
-            aoi=next_aoi,
+            aoi=projected_twin.aoi,
             eve_error=float(np.linalg.norm(next_true_eve - est_eve)),
-            sigma=next_sigma,
+            sigma=projected_twin.sigma,
             a_max=float(self.cfg["metrics"]["a_max"]),
             d_max=float(self.cfg["metrics"]["d_max"]),
             sigma_max=float(self.cfg["metrics"]["sigma_max"]),
@@ -311,50 +398,54 @@ class UAVSecurityEnv:
             - float(self.cfg["control"]["lambda_sync"]) * sync_cost
             - lambda_outage * outage_penalty
             - lambda_certificate * effective_certificate_penalty
-            - lambda_backlog * next_pending
+            - lambda_backlog * len(next_pending_queue)
             - lambda_badness * projected_badness
             + lambda_margin * margin_bonus
             + emergency_sync_bonus
         )
         # tiny regularization to discourage unnecessary staleness in tie cases
-        score -= 0.001 * next_aoi
+        score -= 0.001 * projected_twin.aoi
         return float(score)
 
     def _move_eve(self) -> None:
         noise_std = float(self.cfg["eve"].get("speed_noise_std", 0.0))
-        self.eve.step(delta_t=self.delta_t, noise_std=noise_std, rng=self.rng)
-        self.eve.position = clip_area(self.eve.position, self.area)
+        eve_mode = str(self.cfg["eve"].get("mode", "mobile"))
+        if eve_mode in {"adaptive", "adaptive_mobile"}:
+            next_pos = self._predict_next_eve_position(self.uav1.position, self.uav2.position, self.uav1.power, self.uav2.power)
+            if noise_std > 0.0:
+                next_pos = next_pos + self.rng.normal(0.0, noise_std, size=2) * self.delta_t
+            next_pos = clip_area(next_pos, self.area)
+            self.eve.velocity = (next_pos - self.eve.position) / max(self.delta_t, 1e-12)
+            self.eve.position = next_pos
+        else:
+            self.eve.step(delta_t=self.delta_t, noise_std=noise_std, rng=self.rng)
+            self.eve.position = clip_area(self.eve.position, self.area)
 
-    def _advance_pending_syncs(self) -> bool:
+    def _advance_pending_syncs(self) -> tuple[bool, float]:
         if not self.pending_syncs:
-            return False
+            return False, 0.0
 
-        matured = []
-        updated_queue = []
-        for steps_left in self.pending_syncs:
-            new_steps_left = steps_left - 1
-            if new_steps_left <= 0:
-                matured.append(new_steps_left)
-            else:
-                updated_queue.append(new_steps_left)
+        matured_bandwidths, updated_queue = self._project_pending_queue(self.pending_syncs)
         self.pending_syncs = updated_queue
-        if not matured:
-            return False
+        if not matured_bandwidths:
+            return False, 0.0
 
         failure_prob = float(self.cfg["sync"].get("failure_prob", 0.0))
         if self.rng.random() < failure_prob:
-            return False
+            return False, 0.0
 
-        self.twin = self.twin_tracker.sync(self.twin, self.eve)
-        return True
+        applied_bw = max(matured_bandwidths)
+        self.twin = self.twin_tracker.sync(self.twin, self.eve, applied_bw, rng=self.rng, noisy=True)
+        return True, float(applied_bw)
 
     def step(self, action: Dict[str, Any]) -> StepResult:
         move1 = action.get("move_uav1", "stay")
         move2 = action.get("move_uav2", "stay")
         p_s = float(action.get("p_s", 1.0))
         p_j = float(action.get("p_j", 0.8))
-        do_sync = bool(action.get("sync", False)) and self.remaining_budget > 0
-        sync_cost = float(self.cfg["sync"]["full_sync_cost"]) if do_sync else 0.0
+        sync_bandwidth = self._resolve_sync_bandwidth(action)
+        do_sync = sync_bandwidth > 0.0
+        sync_cost = float(sync_bandwidth) if do_sync else 0.0
         sync_delay = int(self.cfg["sync"].get("delay_slots", 0))
 
         self.uav1.position = apply_move(self.uav1.position, move1, float(self.cfg["control"]["step_size"]), self.area)
@@ -367,16 +458,16 @@ class UAVSecurityEnv:
         self._move_eve()
         self.true_eve_history.append(self.eve.position.copy())
 
-        sync_applied = self._advance_pending_syncs()
+        sync_applied, matured_bandwidth = self._advance_pending_syncs()
         if do_sync:
-            self.remaining_budget -= 1
+            self.remaining_budget -= sync_bandwidth
             self.total_sync_cost += sync_cost
             self.sync_count += 1
             if sync_delay <= 0:
-                self.twin = self.twin_tracker.sync(self.twin, self.eve)
+                self.twin = self.twin_tracker.sync(self.twin, self.eve, sync_bandwidth, rng=self.rng, noisy=True)
                 sync_applied = True
             else:
-                self.pending_syncs.append(sync_delay)
+                self.pending_syncs.append({"steps_left": float(sync_delay), "bandwidth": float(sync_bandwidth)})
             sync_reason = action.get("sync_reason", "sync")
         else:
             sync_reason = action.get("sync_reason", "no_sync")
@@ -412,6 +503,8 @@ class UAVSecurityEnv:
             "sync_applied": int(sync_applied),
             "sync_reason": sync_reason,
             "sync_cost": sync_cost,
+            "sync_bandwidth": float(sync_bandwidth),
+            "matured_sync_bandwidth": float(matured_bandwidth),
             "total_sync_cost": self.total_sync_cost,
             "remaining_budget": self.remaining_budget,
             "pending_syncs": int(len(self.pending_syncs)),

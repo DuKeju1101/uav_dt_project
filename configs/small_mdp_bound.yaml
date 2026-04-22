@@ -1,0 +1,106 @@
+seed: 42
+num_seeds: 1
+episode_length: 6
+delta_t: 1.0
+
+area:
+  width: 120.0
+  height: 120.0
+
+height_uav: 80.0
+
+bs:
+  x: 60.0
+  y: 60.0
+
+users:
+  positions:
+    - [25.0, 25.0]
+    - [95.0, 25.0]
+
+uav1:
+  start: [40.0, 60.0]
+
+uav2:
+  start: [80.0, 60.0]
+
+eve:
+  mode: adaptive_mobile
+  start: [62.0, 52.0]
+  velocity: [-2.0, -1.0]
+  max_speed: 2.5
+  speed_noise_std: 0.0
+
+sync:
+  budget: 3.0
+  full_sync_cost: 1.0
+  bandwidth_min: 0.5
+  bandwidth_max: 1.0
+  bandwidth_levels: [0.5, 1.0]
+  default_bandwidth: 1.0
+  delay_slots: 0
+  failure_prob: 0.0
+  random_sync_prob: 0.3
+  aoi_threshold: 2
+  periodic_k: 2
+  risk_threshold: 0.4
+  rho: 0.02
+  tau0: 0.4
+  tau_budget_eta: 0.3
+  sigma0: 2.0
+  sigma_growth: 0.6
+  kalman_velocity_sigma0: 1.0
+  kalman_process_accel_std: 0.35
+  measurement_std_at_max_bw: 0.5
+
+channel:
+  beta0: 1.0
+  path_loss_exp: 2.25
+  noise_power: 1.0e-06
+  xi_legit_interference: 0.12
+  r_min: 0.9
+  use_probabilistic_los: true
+  los_a: 9.61
+  los_b: 0.16
+  eta_los_db: 1.0
+  eta_nlos_db: 18.0
+  fading_los_mean: 1.0
+  fading_nlos_mean: 1.0
+
+control:
+  step_size: 10.0
+  p_s_levels: [0.5, 0.75, 1.0]
+  p_j_levels: [0.0, 0.5, 1.0]
+  lambda_move: 0.002
+  lambda_power: 0.01
+  lambda_sync: 0.03
+  lambda_outage: 0.5
+  lambda_certificate: 0.15
+  lambda_pending_sync: 0.0
+  lambda_badness: 0.08
+  lambda_margin: 0.03
+  rollout_horizon: 2
+  rollout_gamma: 0.9
+  rollout_branching: 8
+  rollout_move_candidates: 5
+  rollout_power_candidates: 3
+  max_candidates: 225
+  allowed_moves:
+    - stay
+    - up
+    - down
+    - left
+    - right
+
+metrics:
+  a_max: 8.0
+  d_max: 60.0
+  sigma_max: 20.0
+  q_weights: [0.35, 0.45, 0.2]
+
+threshold:
+  kappa: [0.01, 0.012, 0.005]
+  w_risk: [0.25, 0.3, 0.2, 0.25]
+
+theory:
+  margin_coeffs: [0.01, 0.001, 0.005]

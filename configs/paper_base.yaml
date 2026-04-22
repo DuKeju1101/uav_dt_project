@@ -26,17 +26,26 @@ uav2:
   - 320.0
   - 260.0
 eve:
-  mode: mobile
+  mode: adaptive_mobile
   start:
   - 235.0
   - 250.0
   velocity:
   - -5.0
   - -2.0
+  max_speed: 5.5
   speed_noise_std: 0.8
 sync:
-  budget: 28
+  budget: 28.0
   full_sync_cost: 1.0
+  bandwidth_min: 0.25
+  bandwidth_max: 1.0
+  bandwidth_levels:
+  - 0.25
+  - 0.5
+  - 0.75
+  - 1.0
+  default_bandwidth: 0.75
   delay_slots: 1
   failure_prob: 0.05
   random_sync_prob: 0.35
@@ -48,33 +57,60 @@ sync:
   tau_budget_eta: 0.38
   sigma0: 3.8
   sigma_growth: 1.35
+  kalman_velocity_sigma0: 1.8
+  kalman_process_accel_std: 0.8
+  measurement_std_at_max_bw: 1.1
 channel:
   beta0: 1.0
   path_loss_exp: 2.35
   noise_power: 1.0e-06
   xi_legit_interference: 0.18
   r_min: 2.55
+  use_probabilistic_los: true
+  los_a: 9.61
+  los_b: 0.16
+  eta_los_db: 1.0
+  eta_nlos_db: 18.0
+  fading_los_mean: 1.0
+  fading_nlos_mean: 1.0
 control:
   step_size: 10.0
   p_s_levels:
+  - 0.35
   - 0.5
+  - 0.65
+  - 0.8
   - 1.0
   p_j_levels:
   - 0.0
+  - 0.25
   - 0.5
+  - 0.75
+  - 1.0
   lambda_move: 0.002
   lambda_power: 0.01
   lambda_sync: 0.03
   lambda_outage: 0.75
   lambda_certificate: 0.2
+  lambda_certificate_relief: 0.35
+  lambda_sync_emergency_bonus: 0.12
   lambda_pending_sync: 0.04
   lambda_badness: 0.1
   lambda_margin: 0.04
   rollout_horizon: 2
   rollout_gamma: 0.92
-  rollout_branching: 12
-  rollout_deep_branching: 4
+  rollout_branching: 6
+  rollout_deep_branching: 3
   rollout_tail_branching: 2
+  rollout_min_sync_branching: 2
+  rollout_min_tail_sync_branching: 1
+  rollout_move_candidates: 5
+  rollout_power_candidates: 3
+  greedy_move_candidates: 5
+  greedy_power_candidates: 3
+  rollout_force_sync_if_unsafe: true
+  rollout_force_sync_badness_threshold: 0.18
+  rollout_force_sync_margin_threshold: -0.15
   max_candidates: 324
   allowed_moves:
   - stay
@@ -82,6 +118,10 @@ control:
   - down
   - left
   - right
+  - up_left
+  - up_right
+  - down_left
+  - down_right
 metrics:
   a_max: 20.0
   d_max: 200.0

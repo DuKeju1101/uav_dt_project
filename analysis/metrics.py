@@ -7,6 +7,8 @@ import pandas as pd
 
 def summarize_episode(df: pd.DataFrame) -> Dict[str, float]:
     mean_sync = float(df["sync"].mean())
+    mean_sync_cost = float(df["sync_cost"].mean()) if "sync_cost" in df.columns else mean_sync
+    mean_sync_bandwidth = float(df["sync_bandwidth"].mean()) if "sync_bandwidth" in df.columns else mean_sync_cost
     mean_q = float(df["twin_quality"].mean())
     mean_badness = float(df["twin_badness"].mean())
     mean_r_sec = float(df["true_r_sec"].mean())
@@ -22,7 +24,9 @@ def summarize_episode(df: pd.DataFrame) -> Dict[str, float]:
     cert_cover_rate = float(df["cert_cover"].mean()) if "cert_cover" in df.columns else 0.0
     realized_loss_mean = float(df["realized_loss"].mean()) if "realized_loss" in df.columns else 0.0
     return {
-        "avg_sync_cost": mean_sync,
+        "avg_sync_cost": mean_sync_cost,
+        "avg_sync_bandwidth": mean_sync_bandwidth,
+        "sync_request_rate": mean_sync,
         "avg_sync_applied": mean_sync_applied,
         "avg_pending_syncs": pending_mean,
         "avg_twin_quality": mean_q,
@@ -43,6 +47,8 @@ def summarize_episode(df: pd.DataFrame) -> Dict[str, float]:
 def aggregate_runs(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     metrics = [
         "avg_sync_cost",
+        "avg_sync_bandwidth",
+        "sync_request_rate",
         "avg_sync_applied",
         "avg_pending_syncs",
         "avg_twin_quality",
@@ -68,6 +74,8 @@ def aggregate_runs(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
 def aggregate_runs_with_ci(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     metrics = [
         "avg_sync_cost",
+        "avg_sync_bandwidth",
+        "sync_request_rate",
         "avg_sync_applied",
         "avg_pending_syncs",
         "avg_twin_quality",

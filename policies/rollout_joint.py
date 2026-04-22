@@ -18,6 +18,17 @@ class RolloutJointController:
         self.step_moves = list(self.cfg["control"].get("allowed_moves", ALL_MOVES))
         self.p_s_levels = [float(x) for x in self.cfg["control"]["p_s_levels"]]
         self.p_j_levels = [float(x) for x in self.cfg["control"]["p_j_levels"]]
+        self.sync_bandwidth_levels = [
+            float(x)
+            for x in self.cfg["sync"].get(
+                "bandwidth_levels",
+                [self.cfg["sync"].get("bandwidth_max", 1.0)],
+            )
+            if float(x) > 0.0
+        ]
+        self.bandwidth_min = float(self.cfg["sync"].get("bandwidth_min", 0.25))
+        self.move_candidate_limit = int(self.cfg["control"].get("rollout_move_candidates", 5))
+        self.power_candidate_limit = int(self.cfg["control"].get("rollout_power_candidates", 3))
         self.rollout_horizon = int(self.cfg["control"].get("rollout_horizon", 3))
         self.gamma = float(self.cfg["control"].get("rollout_gamma", 0.92))
         self.branching_limit = int(self.cfg["control"].get("rollout_branching", 16))
@@ -46,7 +57,6 @@ class RolloutJointController:
             )
         )
         self.use_oracle_state = bool(use_oracle_state)
-        self._action_cache: dict[bool, list[Dict[str, Any]]] = {}
         self.force_sync_badness_threshold = self.cfg["control"].get("rollout_force_sync_badness_threshold")
         self.force_sync_margin_threshold = self.cfg["control"].get("rollout_force_sync_margin_threshold")
         self.force_sync_if_unsafe = bool(self.cfg["control"].get("rollout_force_sync_if_unsafe", False))
@@ -67,35 +77,119 @@ class RolloutJointController:
         )
         self.hybrid_budget_guard_ratio = float(self.cfg["control"].get("rollout_hybrid_budget_guard_ratio", 0.35))
 
-    def _action_space(self, remaining_budget: int) -> list[Dict[str, Any]]:
-        has_budget = remaining_budget > 0
-        if has_budget in self._action_cache:
-            return [dict(action) for action in self._action_cache[has_budget]]
+    def _merge_ranked_pairs(
+        self,
+        primary: list[tuple[float, tuple]],
+        secondary: list[tuple[float, tuple]],
+        limit: int,
+    ) -> list[tuple]:
+        merged: list[tuple] = []
+        seen: set[tuple] = set()
+        for bucket in (primary, secondary):
+            for _, pair in bucket:
+                if pair in seen:
+                    continue
+                merged.append(pair)
+                seen.add(pair)
+                if len(merged) >= limit:
+                    return merged
+        return merged
 
-        sync_choices = [False, True] if has_budget else [False]
-        actions = []
-        for move1, move2, p_s, p_j, sync_flag in itertools.product(
-            self.step_moves,
-            self.step_moves,
-            self.p_s_levels,
-            self.p_j_levels,
-            sync_choices,
-        ):
-            actions.append(
-                {
-                    "move_uav1": move1,
-                    "move_uav2": move2,
-                    "p_s": p_s,
-                    "p_j": p_j,
-                    "sync": sync_flag,
-                    "sync_reason": "rollout_joint" if sync_flag else "rollout_skip",
-                }
+    def _top_move_pairs(self, env, representative_sync_bw: float = 0.0) -> list[tuple[str, str]]:
+        proxy_p_s = max(self.p_s_levels)
+        proxy_p_j = self.p_j_levels[min(len(self.p_j_levels) - 1, max(0, len(self.p_j_levels) // 2))]
+        scored_nosync: list[tuple[float, tuple[str, str]]] = []
+        scored_sync: list[tuple[float, tuple[str, str]]] = []
+        for move1, move2 in itertools.product(self.step_moves, self.step_moves):
+            action_nosync = {
+                "move_uav1": move1,
+                "move_uav2": move2,
+                "p_s": proxy_p_s,
+                "p_j": proxy_p_j,
+                "sync": False,
+                "sync_bandwidth": 0.0,
+            }
+            score_nosync = float(
+                env.evaluate_candidate(action_nosync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
             )
-        self._action_cache[has_budget] = [dict(action) for action in actions]
+            scored_nosync.append((score_nosync, (move1, move2)))
+            if representative_sync_bw > 0.0:
+                action_sync = dict(action_nosync)
+                action_sync["sync"] = True
+                action_sync["sync_bandwidth"] = float(representative_sync_bw)
+                score_sync = float(
+                    env.evaluate_candidate(action_sync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
+                )
+                scored_sync.append((score_sync, (move1, move2)))
+        scored_nosync.sort(key=lambda item: item[0], reverse=True)
+        scored_sync.sort(key=lambda item: item[0], reverse=True)
+        return self._merge_ranked_pairs(scored_nosync, scored_sync, self.move_candidate_limit)
+
+    def _top_power_pairs(self, env, representative_sync_bw: float = 0.0) -> list[tuple[float, float]]:
+        scored_nosync: list[tuple[float, tuple[float, float]]] = []
+        scored_sync: list[tuple[float, tuple[float, float]]] = []
+        for p_s, p_j in itertools.product(self.p_s_levels, self.p_j_levels):
+            action_nosync = {
+                "move_uav1": "stay",
+                "move_uav2": "stay",
+                "p_s": p_s,
+                "p_j": p_j,
+                "sync": False,
+                "sync_bandwidth": 0.0,
+            }
+            score_nosync = float(
+                env.evaluate_candidate(action_nosync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
+            )
+            scored_nosync.append((score_nosync, (p_s, p_j)))
+            if representative_sync_bw > 0.0:
+                action_sync = dict(action_nosync)
+                action_sync["sync"] = True
+                action_sync["sync_bandwidth"] = float(representative_sync_bw)
+                score_sync = float(
+                    env.evaluate_candidate(action_sync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
+                )
+                scored_sync.append((score_sync, (p_s, p_j)))
+        scored_nosync.sort(key=lambda item: item[0], reverse=True)
+        scored_sync.sort(key=lambda item: item[0], reverse=True)
+        return self._merge_ranked_pairs(scored_nosync, scored_sync, self.power_candidate_limit)
+
+    def _action_space(self, env, remaining_budget: float) -> list[Dict[str, Any]]:
+        feasible_sync_bandwidths = tuple(
+            bw for bw in self.sync_bandwidth_levels if bw <= float(remaining_budget) + 1e-12 and bw >= self.bandwidth_min
+        )
+        representative_sync_bw = max(feasible_sync_bandwidths) if feasible_sync_bandwidths else 0.0
+        move_pairs = self._top_move_pairs(env, representative_sync_bw=representative_sync_bw)
+        power_pairs = self._top_power_pairs(env, representative_sync_bw=representative_sync_bw)
+        actions = []
+        for move1, move2 in move_pairs:
+            for p_s, p_j in power_pairs:
+                actions.append(
+                    {
+                        "move_uav1": move1,
+                        "move_uav2": move2,
+                        "p_s": p_s,
+                        "p_j": p_j,
+                        "sync": False,
+                        "sync_bandwidth": 0.0,
+                        "sync_reason": "rollout_skip",
+                    }
+                )
+                for bandwidth in feasible_sync_bandwidths:
+                    actions.append(
+                        {
+                            "move_uav1": move1,
+                            "move_uav2": move2,
+                            "p_s": p_s,
+                            "p_j": p_j,
+                            "sync": True,
+                            "sync_bandwidth": float(bandwidth),
+                            "sync_reason": "rollout_joint",
+                        }
+                    )
         return [dict(action) for action in actions]
 
-    def _scored_candidates(self, env, remaining_budget: int, limit: int) -> list[tuple[float, Dict[str, Any]]]:
-        actions = self._action_space(remaining_budget)
+    def _scored_candidates(self, env, remaining_budget: float, limit: int) -> list[tuple[float, Dict[str, Any]]]:
+        actions = self._action_space(env, remaining_budget)
         if len(actions) <= limit:
             return [
                 (
@@ -129,11 +223,11 @@ class RolloutJointController:
             return 0.0
 
         obs = env.get_observation()
-        scored = self._scored_candidates(env, int(obs["remaining_budget"]), self.tail_branching_limit * 3)
+        scored = self._scored_candidates(env, float(obs["remaining_budget"]), self.tail_branching_limit * 3)
         scored = self._diversify_candidates(
             scored,
             limit=self.tail_branching_limit,
-            min_sync=self.min_tail_sync_branching if int(obs["remaining_budget"]) > 0 else 0,
+            min_sync=self.min_tail_sync_branching if float(obs["remaining_budget"]) >= self.bandwidth_min else 0,
         )
         if not scored:
             return 0.0
@@ -148,26 +242,26 @@ class RolloutJointController:
     def _root_candidates(
         self,
         env,
-        remaining_budget: int,
+        remaining_budget: float,
         force_sync_only: bool = False,
         force_nosync_only: bool = False,
     ) -> list[tuple[float, Dict[str, Any]]]:
         scored = self._scored_candidates(env, remaining_budget, self.branching_limit * 3)
         if force_sync_only:
-            scored = [item for item in scored if bool(item[1].get("sync", False))]
+            scored = [item for item in scored if float(item[1].get("sync_bandwidth", 0.0)) > 0.0]
         elif force_nosync_only:
-            scored = [item for item in scored if not bool(item[1].get("sync", False))]
+            scored = [item for item in scored if float(item[1].get("sync_bandwidth", 0.0)) <= 0.0]
         return self._diversify_candidates(
             scored,
             limit=self.branching_limit,
-            min_sync=self.min_sync_branching if (remaining_budget > 0 and not force_nosync_only) else 0,
+            min_sync=self.min_sync_branching if (remaining_budget >= self.bandwidth_min and not force_nosync_only) else 0,
         )
 
     def _rollout_value(self, env, depth: int) -> float:
         return self._greedy_tail_value(env, depth)
 
     def _hybrid_sync_gate(self, obs: Dict[str, Any]) -> tuple[str, str]:
-        if not self.hybrid_enable or int(obs["remaining_budget"]) <= 0:
+        if not self.hybrid_enable or float(obs["remaining_budget"]) < self.bandwidth_min:
             return "free", "rollout_default"
 
         slot = int(obs.get("slot", 0))
@@ -177,7 +271,7 @@ class RolloutJointController:
         pred_margin = float(obs.get("pred_margin", 0.0))
         cert_slack = float(obs.get("cert_slack", 0.0))
         outage_pressure = max(-pred_margin, 0.0)
-        budget_ratio = int(obs["remaining_budget"]) / max(int(self.cfg["sync"].get("budget", 1)), 1)
+        budget_ratio = float(obs["remaining_budget"]) / max(float(self.cfg["sync"].get("budget", 1.0)), 1e-12)
 
         high_risk = (
             (not certified_safe)
@@ -212,9 +306,7 @@ class RolloutJointController:
         if len(scored) <= limit:
             return scored
 
-        sync_scored = [item for item in scored if bool(item[1].get("sync", False))]
-        nonsync_scored = [item for item in scored if not bool(item[1].get("sync", False))]
-
+        sync_scored = [item for item in scored if float(item[1].get("sync_bandwidth", 0.0)) > 0.0]
         picked: list[tuple[float, Dict[str, Any]]] = []
         used_ids: set[int] = set()
 
@@ -241,7 +333,7 @@ class RolloutJointController:
         forced_nosync_reason = None
 
         sync_gate, hybrid_reason = self._hybrid_sync_gate(obs)
-        if int(obs["remaining_budget"]) > 0:
+        if float(obs["remaining_budget"]) >= self.bandwidth_min:
             unsafe = int(obs.get("certified_safe", 1)) == 0
             high_badness = (
                 self.force_sync_badness_threshold is not None
@@ -266,21 +358,21 @@ class RolloutJointController:
         best_value = None
         root_candidates = self._root_candidates(
             env,
-            int(obs["remaining_budget"]),
+            float(obs["remaining_budget"]),
             force_sync_only=force_sync_only,
             force_nosync_only=force_nosync_only,
         )
         if not root_candidates and force_sync_only:
             root_candidates = self._root_candidates(
                 env,
-                int(obs["remaining_budget"]),
+                float(obs["remaining_budget"]),
                 force_sync_only=False,
                 force_nosync_only=False,
             )
         if not root_candidates and force_nosync_only:
             root_candidates = self._root_candidates(
                 env,
-                int(obs["remaining_budget"]),
+                float(obs["remaining_budget"]),
                 force_sync_only=False,
                 force_nosync_only=False,
             )
