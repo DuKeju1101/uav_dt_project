@@ -60,6 +60,25 @@ class RolloutJointController:
         self.force_sync_badness_threshold = self.cfg["control"].get("rollout_force_sync_badness_threshold")
         self.force_sync_margin_threshold = self.cfg["control"].get("rollout_force_sync_margin_threshold")
         self.force_sync_if_unsafe = bool(self.cfg["control"].get("rollout_force_sync_if_unsafe", False))
+        self.force_sync_aoi_threshold = int(
+            self.cfg["control"].get(
+                "rollout_force_sync_aoi_threshold",
+                max(2, int(self.cfg["sync"].get("aoi_threshold", 5)) - 1),
+            )
+        )
+        self.force_hold_when_safe = bool(self.cfg["control"].get("rollout_force_hold_when_safe", True))
+        self.safe_badness_threshold = float(
+            self.cfg["control"].get("rollout_safe_badness_threshold", 0.16)
+        )
+        self.safe_margin_threshold = float(
+            self.cfg["control"].get("rollout_safe_margin_threshold", 0.06)
+        )
+        self.safe_cert_slack_threshold = float(
+            self.cfg["control"].get("rollout_safe_cert_slack_threshold", 0.08)
+        )
+        self.safe_aoi_threshold = int(self.cfg["control"].get("rollout_safe_aoi_threshold", 1))
+        self.rollout_budget_guard_ratio = float(self.cfg["control"].get("rollout_budget_guard_ratio", 0.35))
+        self.resync_cooldown_aoi = int(self.cfg["control"].get("rollout_resync_cooldown_aoi", 0))
         self.hybrid_enable = bool(self.cfg["control"].get("rollout_hybrid_enable", False))
         self.hybrid_periodic_k = int(
             self.cfg["control"].get("rollout_hybrid_periodic_k", self.cfg["sync"].get("periodic_k", 6))
@@ -76,6 +95,64 @@ class RolloutJointController:
             self.cfg["control"].get("rollout_hybrid_force_hold_when_safe", True)
         )
         self.hybrid_budget_guard_ratio = float(self.cfg["control"].get("rollout_hybrid_budget_guard_ratio", 0.35))
+        self._eval_cache: dict[tuple[Any, ...], float] = {}
+
+    def _state_cache_key(self, env) -> tuple[Any, ...]:
+        pending = tuple(
+            (round(float(item["steps_left"]), 4), round(float(item["bandwidth"]), 4))
+            for item in env.pending_syncs
+        )
+        return (
+            int(env.slot),
+            round(float(env.remaining_budget), 4),
+            round(float(env.total_sync_cost), 4),
+            int(env.sync_count),
+            tuple(round(float(x), 3) for x in env.uav1.position),
+            tuple(round(float(x), 3) for x in env.uav2.position),
+            tuple(round(float(x), 3) for x in env.eve.position),
+            tuple(round(float(x), 3) for x in env.eve.velocity),
+            tuple(round(float(x), 3) for x in env.twin.state),
+            round(float(env.twin.last_sync_bandwidth), 3),
+            pending,
+        )
+
+    def _action_cache_key(
+        self,
+        env,
+        action: Dict[str, Any],
+        include_sync_penalty: bool,
+    ) -> tuple[Any, ...]:
+        return (
+            self._state_cache_key(env),
+            bool(include_sync_penalty),
+            bool(self.use_oracle_state),
+            str(action.get("move_uav1", "stay")),
+            str(action.get("move_uav2", "stay")),
+            round(float(action.get("p_s", 0.0)), 4),
+            round(float(action.get("p_j", 0.0)), 4),
+            bool(action.get("sync", False)),
+            round(float(action.get("sync_bandwidth", 0.0)), 4),
+        )
+
+    def _score_action_cached(
+        self,
+        env,
+        action: Dict[str, Any],
+        include_sync_penalty: bool,
+    ) -> float:
+        key = self._action_cache_key(env, action, include_sync_penalty)
+        cached = self._eval_cache.get(key)
+        if cached is not None:
+            return cached
+        score = float(
+            env.evaluate_candidate(
+                action,
+                include_sync_penalty=include_sync_penalty,
+                use_true_eve=self.use_oracle_state,
+            )
+        )
+        self._eval_cache[key] = score
+        return score
 
     def _merge_ranked_pairs(
         self,
@@ -109,17 +186,13 @@ class RolloutJointController:
                 "sync": False,
                 "sync_bandwidth": 0.0,
             }
-            score_nosync = float(
-                env.evaluate_candidate(action_nosync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
-            )
+            score_nosync = self._score_action_cached(env, action_nosync, include_sync_penalty=False)
             scored_nosync.append((score_nosync, (move1, move2)))
             if representative_sync_bw > 0.0:
                 action_sync = dict(action_nosync)
                 action_sync["sync"] = True
                 action_sync["sync_bandwidth"] = float(representative_sync_bw)
-                score_sync = float(
-                    env.evaluate_candidate(action_sync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
-                )
+                score_sync = self._score_action_cached(env, action_sync, include_sync_penalty=False)
                 scored_sync.append((score_sync, (move1, move2)))
         scored_nosync.sort(key=lambda item: item[0], reverse=True)
         scored_sync.sort(key=lambda item: item[0], reverse=True)
@@ -137,17 +210,13 @@ class RolloutJointController:
                 "sync": False,
                 "sync_bandwidth": 0.0,
             }
-            score_nosync = float(
-                env.evaluate_candidate(action_nosync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
-            )
+            score_nosync = self._score_action_cached(env, action_nosync, include_sync_penalty=False)
             scored_nosync.append((score_nosync, (p_s, p_j)))
             if representative_sync_bw > 0.0:
                 action_sync = dict(action_nosync)
                 action_sync["sync"] = True
                 action_sync["sync_bandwidth"] = float(representative_sync_bw)
-                score_sync = float(
-                    env.evaluate_candidate(action_sync, include_sync_penalty=False, use_true_eve=self.use_oracle_state)
-                )
+                score_sync = self._score_action_cached(env, action_sync, include_sync_penalty=False)
                 scored_sync.append((score_sync, (p_s, p_j)))
         scored_nosync.sort(key=lambda item: item[0], reverse=True)
         scored_sync.sort(key=lambda item: item[0], reverse=True)
@@ -192,28 +261,13 @@ class RolloutJointController:
         actions = self._action_space(env, remaining_budget)
         if len(actions) <= limit:
             return [
-                (
-                    float(
-                        env.evaluate_candidate(
-                            action,
-                            include_sync_penalty=True,
-                            use_true_eve=self.use_oracle_state,
-                        )
-                    ),
-                    action,
-                )
+                (self._score_action_cached(env, action, include_sync_penalty=True), action)
                 for action in actions
             ]
 
         scored = []
         for action in actions:
-            score = float(
-                env.evaluate_candidate(
-                    action,
-                    include_sync_penalty=True,
-                    use_true_eve=self.use_oracle_state,
-                )
-            )
+            score = self._score_action_cached(env, action, include_sync_penalty=True)
             scored.append((score, action))
         scored.sort(key=lambda item: item[0], reverse=True)
         return scored[:limit]
@@ -327,6 +381,7 @@ class RolloutJointController:
         return picked[:limit]
 
     def act(self, env, obs: Dict[str, Any]) -> Dict[str, Any]:
+        self._eval_cache = {}
         force_sync_only = False
         force_nosync_only = False
         forced_sync_reason = None
@@ -334,25 +389,55 @@ class RolloutJointController:
 
         sync_gate, hybrid_reason = self._hybrid_sync_gate(obs)
         if float(obs["remaining_budget"]) >= self.bandwidth_min:
+            aoi = int(obs.get("aoi", 0))
+            badness = float(obs.get("twin_badness", 0.0))
+            pred_margin = float(obs.get("pred_margin", 0.0))
+            cert_slack = float(obs.get("cert_slack", 0.0))
             unsafe = int(obs.get("certified_safe", 1)) == 0
+            budget_ratio = float(obs["remaining_budget"]) / max(float(self.cfg["sync"].get("budget", 1.0)), 1e-12)
             high_badness = (
                 self.force_sync_badness_threshold is not None
-                and float(obs.get("twin_badness", 0.0)) >= float(self.force_sync_badness_threshold)
+                and badness >= float(self.force_sync_badness_threshold)
             )
             low_margin = (
                 self.force_sync_margin_threshold is not None
-                and float(obs.get("pred_margin", 0.0)) <= float(self.force_sync_margin_threshold)
+                and pred_margin <= float(self.force_sync_margin_threshold)
             )
-            emergency_force_sync = bool((self.force_sync_if_unsafe and unsafe and high_badness) or low_margin)
+            stale_twin = bool(high_badness or aoi >= self.force_sync_aoi_threshold)
+            low_risk_hold = bool(
+                self.force_hold_when_safe
+                and (not unsafe)
+                and badness <= self.safe_badness_threshold
+                and pred_margin >= self.safe_margin_threshold
+                and cert_slack >= self.safe_cert_slack_threshold
+                and aoi <= self.safe_aoi_threshold
+            )
+            emergency_force_sync = bool(
+                ((self.force_sync_if_unsafe and unsafe) or low_margin) and stale_twin
+            )
             if emergency_force_sync:
                 force_sync_only = True
                 forced_sync_reason = "rollout_emergency_force_sync"
+            elif (
+                (not self.hybrid_enable)
+                and self.resync_cooldown_aoi > 0
+                and int(obs.get("slot", 0)) > 0
+                and aoi < self.resync_cooldown_aoi
+            ):
+                force_nosync_only = True
+                forced_nosync_reason = "rollout_resync_cooldown"
+            elif (not self.hybrid_enable) and budget_ratio <= self.rollout_budget_guard_ratio:
+                force_nosync_only = True
+                forced_nosync_reason = "rollout_budget_guard"
             elif sync_gate == "force_sync":
                 force_sync_only = True
                 forced_sync_reason = hybrid_reason
             elif sync_gate == "force_nosync":
                 force_nosync_only = True
                 forced_nosync_reason = hybrid_reason
+            elif (not self.hybrid_enable) and low_risk_hold:
+                force_nosync_only = True
+                forced_nosync_reason = "rollout_secrecy_guard"
 
         best_action = None
         best_value = None

@@ -336,7 +336,10 @@ class UAVSecurityEnv:
         power_cost = p_s + p_j
         sync_cost = float(sync_bandwidth) if do_sync and include_sync_penalty else 0.0
         r_min = float(self.cfg["channel"]["r_min"])
-        pred_margin = pred_metrics["r_sec"] - r_min
+        alpha_discount = float(self.cfg["control"].get("aoi_discount_alpha", 0.05))
+        aoi_discount = 1.0 / (1.0 + max(0.0, alpha_discount) * max(0.0, float(projected_twin.aoi)))
+        adjusted_r_sec = pred_metrics["r_sec"] * aoi_discount
+        pred_margin = adjusted_r_sec - r_min
         pred_radius = predicted_error_radius(
             aoi=projected_twin.aoi,
             v_max=float(np.linalg.norm(self.eve.velocity) + 3 * self.cfg["eve"].get("speed_noise_std", 0.0)),
@@ -374,7 +377,10 @@ class UAVSecurityEnv:
         lambda_backlog = float(self.cfg["control"].get("lambda_pending_sync", 0.0))
         lambda_badness = float(self.cfg["control"].get("lambda_badness", 0.0))
         lambda_margin = float(self.cfg["control"].get("lambda_margin", 0.0))
-        outage_penalty = max(r_min - pred_metrics["r_sec"], 0.0)
+        lambda_sync_voi = float(self.cfg["control"].get("lambda_sync_voi", 0.0))
+        lambda_sync_request = float(self.cfg["control"].get("lambda_sync_request", 0.0))
+        lambda_sync_low_bandwidth = float(self.cfg["control"].get("lambda_sync_low_bandwidth", 0.0))
+        outage_penalty = max(r_min - adjusted_r_sec, 0.0)
         certificate_penalty = max(-float(cert["certificate_slack"]), 0.0)
         stress_relief = min(
             0.9,
@@ -391,17 +397,41 @@ class UAVSecurityEnv:
             emergency_sync_bonus = lambda_sync_emergency_bonus * (
                 projected_badness + max(outage_penalty, 0.0) / max(r_min, 1e-12)
             )
+        sync_voi_bonus = 0.0
+        if do_sync and lambda_sync_voi > 0.0:
+            current_badness = twin_quality(
+                aoi=self.twin.aoi,
+                eve_error=float(np.linalg.norm(self.eve.position - self.twin.eve_est)),
+                sigma=self.twin.sigma,
+                a_max=float(self.cfg["metrics"]["a_max"]),
+                d_max=float(self.cfg["metrics"]["d_max"]),
+                sigma_max=float(self.cfg["metrics"]["sigma_max"]),
+                weights=tuple(self.cfg["metrics"]["q_weights"]),
+            )["badness"]
+            info_gain = max(float(current_badness) - projected_badness, 0.0)
+            aoi_pressure = 1.0 + float(self.twin.aoi) / max(float(self.cfg["metrics"]["a_max"]), 1e-12)
+            bandwidth_util = float(sync_bandwidth) / max(float(self.bandwidth_max), 1e-12)
+            sync_voi_bonus = lambda_sync_voi * info_gain * aoi_pressure * bandwidth_util
+        sync_request_penalty = lambda_sync_request if do_sync and include_sync_penalty else 0.0
+        sync_resolution_penalty = 0.0
+        if do_sync and include_sync_penalty and lambda_sync_low_bandwidth > 0.0:
+            sync_resolution_penalty = lambda_sync_low_bandwidth * (
+                1.0 - float(sync_bandwidth) / max(float(self.bandwidth_max), 1e-12)
+            )
         score = (
-            pred_metrics["r_sec"]
+            adjusted_r_sec
             - float(self.cfg["control"]["lambda_move"]) * movement_cost
             - float(self.cfg["control"]["lambda_power"]) * power_cost
             - float(self.cfg["control"]["lambda_sync"]) * sync_cost
+            - sync_request_penalty
+            - sync_resolution_penalty
             - lambda_outage * outage_penalty
             - lambda_certificate * effective_certificate_penalty
             - lambda_backlog * len(next_pending_queue)
             - lambda_badness * projected_badness
             + lambda_margin * margin_bonus
             + emergency_sync_bonus
+            + sync_voi_bonus
         )
         # tiny regularization to discourage unnecessary staleness in tie cases
         score -= 0.001 * projected_twin.aoi

@@ -95,8 +95,11 @@ control:
   lambda_certificate_relief: 0.4
   lambda_sync_emergency_bonus: 0.15
   lambda_pending_sync: 0.05
-  lambda_badness: 0.12
+  lambda_badness: 0.22
   lambda_margin: 0.05
+  lambda_sync_request: 0.018
+  lambda_sync_low_bandwidth: 0.02
+  aoi_discount_alpha: 0.05
   rollout_horizon: 2
   rollout_gamma: 0.93
   rollout_branching: 6
@@ -111,6 +114,14 @@ control:
   rollout_force_sync_if_unsafe: true
   rollout_force_sync_badness_threshold: 0.16
   rollout_force_sync_margin_threshold: -0.2
+  rollout_force_sync_aoi_threshold: 3
+  rollout_force_hold_when_safe: true
+  rollout_safe_badness_threshold: 0.16
+  rollout_safe_margin_threshold: 0.06
+  rollout_safe_cert_slack_threshold: 0.08
+  rollout_safe_aoi_threshold: 1
+  rollout_budget_guard_ratio: 0.35
+  rollout_resync_cooldown_aoi: 2
   max_candidates: 10125
   allowed_moves:
   - stay

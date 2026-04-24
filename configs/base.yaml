@@ -90,6 +90,7 @@ control:
   lambda_pending_sync: 0.04
   lambda_badness: 0.10
   lambda_margin: 0.04
+  aoi_discount_alpha: 0.05
   rollout_horizon: 1
   rollout_gamma: 0.92
   rollout_branching: 6

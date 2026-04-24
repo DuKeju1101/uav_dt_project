@@ -1,0 +1,7 @@
+| scenario | method | num_runs | avg_secrecy_rate_mean | avg_secrecy_rate_ci95 | outage_prob_mean | outage_prob_ci95 | avg_sync_cost_mean | certificate_cover_rate_mean | runtime_per_slot_ms_mean | runtime_per_slot_ms_ci95 | secrecy_gain_vs_periodic | outage_gain_vs_periodic |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| scenario_stress_holdoutfit | rollout_joint | 5 | 1.267178972972021 | 0.006417415312610181 | 1.0 | 0.0 | 0.08656250000000001 | 1.0 | 444.0075994175004 | 3.0962169023817765 | 0.2483251447858752 | 0.0 |
+| scenario_stress_holdoutfit | periodic | 5 | 1.018853828186146 | 0.020582789560612227 | 1.0 | 0.0 | 0.11875 | 1.0 | 180.44845635750022 | 5.753793103998043 | 0.0 | 0.0 |
+| scenario_stress_holdoutfit | security_risk | 5 | 0.9455659140735058 | 0.052162495241138175 | 1.0 | 0.0 | 0.03849035624635036 | 1.0 | 180.42377140249954 | 1.5665946289526362 | -0.07328791411264013 | 0.0 |
+| scenario_stress_holdoutfit | risk_adaptive_hybrid_rollout | 5 | 0.8370195550269486 | 0.06276429301425472 | 1.0 | 0.0 | 0.11875 | 0.71 | 319.7355703900004 | 3.941625982123904 | -0.1818342731591973 | 0.0 |
+| scenario_stress_holdoutfit | security_margin | 5 | 0.31367365418976334 | 0.010043174018229404 | 1.0 | 0.0 | 0.11849621957381436 | 0.92125 | 180.58511305249993 | 1.8334141857762283 | -0.7051801739963826 | 0.0 |

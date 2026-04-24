@@ -92,6 +92,9 @@ control:
   lambda_pending_sync: 0.05
   lambda_badness: 0.12
   lambda_margin: 0.05
+  lambda_sync_request: 0.01
+  lambda_sync_low_bandwidth: 0.005
+  aoi_discount_alpha: 0.05
   rollout_horizon: 1
   rollout_gamma: 0.93
   rollout_branching: 6
@@ -115,6 +118,7 @@ control:
   rollout_hybrid_outage_pressure_threshold: 0.005
   rollout_hybrid_force_hold_when_safe: true
   rollout_hybrid_budget_guard_ratio: 0.0
+  rollout_resync_cooldown_aoi: 1
   max_candidates: 10125
   allowed_moves:
     - stay

@@ -1,0 +1,4 @@
+| scenario | method | num_runs | avg_secrecy_rate_mean | avg_secrecy_rate_ci95 | outage_prob_mean | outage_prob_ci95 | avg_sync_cost_mean | certificate_cover_rate_mean | runtime_per_slot_ms_mean | runtime_per_slot_ms_ci95 | secrecy_gain_vs_periodic | outage_gain_vs_periodic |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| paper_hard | rollout_joint | 5 | 1.4637113014689669 | 0.01647486346293448 | 0.9442857142857143 | 0.00816333265278339 | 0.09678571428571428 | 0.18714285714285714 | 1736.7245191971415 | 27.750811086269074 | 0.1479127810708072 | 0.0 |
+| paper_hard | periodic | 5 | 1.3157985203981597 | 0.03258364330260669 | 0.9442857142857143 | 0.00816333265278339 | 0.15714285714285714 | 0.25571428571428567 | 116.18569647428687 | 3.6181427318858397 | 0.0 | 0.0 |
