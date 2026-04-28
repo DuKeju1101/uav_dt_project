@@ -86,13 +86,12 @@
 
 ### 3.2 对比方法
 
-20-seed 主实验采用以下 5 个方法：
+20-seed 主实验采用以下 4 个方法：
 
 1. `periodic`
 2. `security_risk`
 3. `security_margin`
 4. `rollout_joint`
-5. `risk_adaptive_hybrid_rollout`
 
 其方法含义可概括为：
 
@@ -104,8 +103,6 @@
    根据证书是否满足 required margin 决定是否同步。
 4. `rollout_joint`
    在同步、轨迹和功率空间里做短视界联合前瞻搜索。
-5. `risk_adaptive_hybrid_rollout`
-   在 rollout 基础上增加风险门控和强制同步/强制保持逻辑。
 
 ### 3.3 论文中可强调的方法主线
 
@@ -156,7 +153,6 @@
 | method | avg_secrecy_rate_mean | avg_secrecy_rate_ci95 | outage_prob_mean | outage_prob_ci95 | avg_sync_cost_mean | certificate_cover_rate_mean | runtime_per_slot_ms_mean |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | periodic | 1.6315 | 0.0100 | 0.8879 | 0.0038 | 0.1500 | 1.0000 | 101.94 |
-| risk_adaptive_hybrid_rollout | 1.5680 | 0.0172 | 0.8975 | 0.0034 | 0.1648 | 0.5521 | 165.16 |
 | security_risk | 1.5096 | 0.0257 | 0.8875 | 0.0037 | 0.0375 | 0.9996 | 101.22 |
 | rollout_joint | 0.9928 | 0.0062 | 0.8871 | 0.0034 | 0.0000 | 1.0000 | 160.99 |
 | security_margin | 0.7991 | 0.0484 | 0.8962 | 0.0036 | 0.2331 | 0.8125 | 100.21 |
@@ -171,7 +167,6 @@
 
 | method | avg_secrecy_rate_mean | avg_secrecy_rate_ci95 | outage_prob_mean | outage_prob_ci95 | avg_sync_cost_mean | certificate_cover_rate_mean | runtime_per_slot_ms_mean |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| risk_adaptive_hybrid_rollout | 1.3901 | 0.0133 | 0.9561 | 0.0045 | 0.1310 | 0.6821 | 160.65 |
 | periodic | 1.2948 | 0.0095 | 0.9482 | 0.0044 | 0.1571 | 1.0000 | 101.78 |
 | security_risk | 1.2435 | 0.0363 | 0.9432 | 0.0036 | 0.0362 | 0.9911 | 100.96 |
 | rollout_joint | 0.7872 | 0.0052 | 0.9450 | 0.0027 | 0.0000 | 1.0000 | 158.98 |
@@ -179,7 +174,7 @@
 
 结论：
 
-1. `risk_adaptive_hybrid_rollout` 在该场景 secrecy 最强。
+1. `periodic` 在该场景 secrecy 最强。
 2. `security_risk` 在 outage 上最好，并且同步成本最低。
 3. `rollout_joint` 仍未表现出对强基线的统治优势。
 
@@ -189,7 +184,6 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | periodic | 0.9887 | 0.0212 | 1.0000 | 0.0000 | 0.1187 | 0.9981 | 99.39 |
 | security_risk | 0.9646 | 0.0304 | 1.0000 | 0.0000 | 0.0395 | 0.9925 | 117.62 |
-| risk_adaptive_hybrid_rollout | 0.7806 | 0.0428 | 1.0000 | 0.0000 | 0.1187 | 0.7206 | 402.09 |
 | rollout_joint | 0.7775 | 0.0318 | 1.0000 | 0.0000 | 0.1187 | 0.7003 | 215.66 |
 | security_margin | 0.3217 | 0.0063 | 1.0000 | 0.0000 | 0.1185 | 0.9166 | 112.02 |
 
@@ -197,7 +191,7 @@
 
 1. 本场景所有方法的 `outage_prob_mean` 都为 `1.0000`，说明 stress 设置已非常苛刻。
 2. `periodic` 在 stress 下仍是 secrecy 最优。
-3. `rollout_joint` 和 hybrid 在最难场景下并未形成优势，且运行时明显更高。
+3. `rollout_joint` 在最难场景下并未形成优势，且运行时明显更高。
 
 ### 5.4 主实验整体结论
 
@@ -205,8 +199,7 @@
 
 1. **当前版本最稳的强基线是 `periodic` 与 `security_risk`**
 2. **`rollout_joint` 没有成为当前口径下的最佳主方法**
-3. **`risk_adaptive_hybrid_rollout` 只在 `paper_hard` secrecy 上表现最好，但稳定性与覆盖率仍不够理想**
-4. **`security_margin` 当前不适合作为主方法，只适合作为补充基线**
+3. **`security_margin` 当前不适合作为主方法，只适合作为补充基线**
 
 这与旧版本文档中的乐观判断已经明显不同，论文叙事必须据此调整。
 
@@ -279,7 +272,6 @@
 | oracle_sync | 2.5437 | 0.2500 | 1.0000 | 122.54 |
 | periodic | 2.5437 | 0.5000 | 0.7500 | 19.02 |
 | random_budgeted | 1.4822 | 0.0000 | 1.0000 | 1.39 |
-| risk_adaptive_hybrid_rollout | 2.5437 | 0.5000 | 0.7500 | 87.23 |
 | rollout_joint | 2.5437 | 0.0000 | 1.0000 | 127.27 |
 | security_margin | 2.5437 | 0.0000 | 1.0000 | 19.73 |
 | security_risk | 2.5437 | 0.0000 | 1.0000 | 18.41 |
@@ -429,10 +421,9 @@
 论文写作时不应回避以下不足：
 
 1. 主方法 `rollout_joint` 当前表现不够强
-2. `risk_adaptive_hybrid_rollout` 稳定性不足
-3. holdout 覆盖率明显低于理想目标
-4. stress 场景过难，导致所有方法 outage=1
-5. full small-MDP exact DP 未在当前资源内完成
+2. holdout 覆盖率明显低于理想目标
+3. stress 场景过难，导致所有方法 outage=1
+4. full small-MDP exact DP 未在当前资源内完成
 
 这些不足必须在后续实验里解决，否则论文主结果会比较脆弱。
 
@@ -461,4 +452,3 @@
 1. **已经具备完整论文初稿条件**
 2. **具备明确创新点和研究价值**
 3. **但还需要一轮针对性重调，才能进入更稳妥的投稿状态**
-

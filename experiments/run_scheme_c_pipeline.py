@@ -121,7 +121,7 @@ def _generate_doc(
     lines.append("1. 改动口径：全部 P0 + 全部 P1。")
     lines.append("2. 关键机制：Kalman twin、conformal certificate、adaptive Eve、概率 LoS/NLoS 信道、连续带宽同步、扩展动作空间。")
     lines.append("3. 主表场景：`paper_base`、`paper_hard`、`scenario_stress`。")
-    lines.append("4. 主表方法：`periodic`、`security_risk`、`security_margin`、`rollout_joint`、`risk_adaptive_hybrid_rollout`。")
+    lines.append("4. 主表方法：`periodic`、`security_risk`、`security_margin`、`rollout_joint`。")
     lines.append("5. 验证 seed：`62-81`。")
     lines.append("")
     lines.append("结果文件：")
@@ -216,7 +216,6 @@ def main() -> None:
             "security_risk",
             "security_margin",
             "rollout_joint",
-            "risk_adaptive_hybrid_rollout",
             "--train-seeds",
             "3",
             "--eval-seeds",
@@ -247,7 +246,6 @@ def main() -> None:
             "security_risk",
             "security_margin",
             "rollout_joint",
-            "risk_adaptive_hybrid_rollout",
             "--num-seeds",
             "20",
             "--seed-start",

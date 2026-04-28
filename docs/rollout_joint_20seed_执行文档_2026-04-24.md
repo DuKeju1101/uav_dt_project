@@ -52,7 +52,7 @@
   --train-configs configs/base.yaml configs/scenario_hard.yaml configs/scenario_stress.yaml \
   --eval-configs configs/paper_base.yaml configs/paper_hard.yaml configs/scenario_stress.yaml \
   --train-methods periodic security_risk aoi_only \
-  --eval-methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --eval-methods periodic security_risk security_margin rollout_joint \
   --train-seeds 3 \
   --eval-seeds 1 \
   --eval-seed-start 20 \
@@ -80,20 +80,19 @@
 - `72-76`
 - `77-81`
 
-每个块都跑 5 个方法：
+每个块都跑 4 个方法：
 
 - `periodic`
 - `security_risk`
 - `security_margin`
 - `rollout_joint`
-- `risk_adaptive_hybrid_rollout`
 
 ### 4.2 paper_base 四块
 
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_base_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 62 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_base_62_66
@@ -102,7 +101,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_base_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 67 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_base_67_71
@@ -111,7 +110,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_base_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 72 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_base_72_76
@@ -120,7 +119,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_base_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 77 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_base_77_81
@@ -131,7 +130,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_hard_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 62 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_hard_62_66
@@ -140,7 +139,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_hard_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 67 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_hard_67_71
@@ -149,7 +148,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_hard_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 72 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_hard_72_76
@@ -158,7 +157,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/paper_hard_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 77 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/paper_hard_77_81
@@ -169,7 +168,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/scenario_stress_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 62 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/scenario_stress_62_66
@@ -178,7 +177,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/scenario_stress_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 67 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/scenario_stress_67_71
@@ -187,7 +186,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/scenario_stress_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 72 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/scenario_stress_72_76
@@ -196,7 +195,7 @@
 ```bash
 ./.venv/bin/python -u -m experiments.run_readiness_multiseed \
   --configs results/scheme_c_holdout_2026-04-24_rollout_vnext/configs/scenario_stress_holdoutfit.yaml \
-  --methods periodic security_risk security_margin rollout_joint risk_adaptive_hybrid_rollout \
+  --methods periodic security_risk security_margin rollout_joint \
   --num-seeds 5 \
   --seed-start 77 \
   --outdir results/scheme_c_readiness_parallel_2026-04-24_rollout_vnext/scenario_stress_77_81

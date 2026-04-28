@@ -15,7 +15,7 @@ DEFAULT_CONFIGS = [
     str(ROOT / "configs" / "paper_hard.yaml"),
     str(ROOT / "configs" / "scenario_stress.yaml"),
 ]
-DEFAULT_METHODS = ["periodic", "security_risk", "security_margin", "rollout_joint", "risk_adaptive_hybrid_rollout"]
+DEFAULT_METHODS = ["periodic", "security_risk", "security_margin", "rollout_joint"]
 
 
 def _save_markdown(df: pd.DataFrame, path: Path) -> None:

@@ -79,22 +79,6 @@ class RolloutJointController:
         self.safe_aoi_threshold = int(self.cfg["control"].get("rollout_safe_aoi_threshold", 1))
         self.rollout_budget_guard_ratio = float(self.cfg["control"].get("rollout_budget_guard_ratio", 0.35))
         self.resync_cooldown_aoi = int(self.cfg["control"].get("rollout_resync_cooldown_aoi", 0))
-        self.hybrid_enable = bool(self.cfg["control"].get("rollout_hybrid_enable", False))
-        self.hybrid_periodic_k = int(
-            self.cfg["control"].get("rollout_hybrid_periodic_k", self.cfg["sync"].get("periodic_k", 6))
-        )
-        self.hybrid_badness_low = float(self.cfg["control"].get("rollout_hybrid_badness_low", 0.16))
-        self.hybrid_badness_high = float(self.cfg["control"].get("rollout_hybrid_badness_high", 0.25))
-        self.hybrid_margin_low = float(self.cfg["control"].get("rollout_hybrid_margin_low", -0.08))
-        self.hybrid_margin_high = float(self.cfg["control"].get("rollout_hybrid_margin_high", 0.06))
-        self.hybrid_cert_slack_low = float(self.cfg["control"].get("rollout_hybrid_cert_slack_low", 0.08))
-        self.hybrid_outage_pressure_threshold = float(
-            self.cfg["control"].get("rollout_hybrid_outage_pressure_threshold", 0.015)
-        )
-        self.hybrid_force_hold_when_safe = bool(
-            self.cfg["control"].get("rollout_hybrid_force_hold_when_safe", True)
-        )
-        self.hybrid_budget_guard_ratio = float(self.cfg["control"].get("rollout_hybrid_budget_guard_ratio", 0.35))
         self._eval_cache: dict[tuple[Any, ...], float] = {}
 
     def _state_cache_key(self, env) -> tuple[Any, ...]:
@@ -314,43 +298,6 @@ class RolloutJointController:
     def _rollout_value(self, env, depth: int) -> float:
         return self._greedy_tail_value(env, depth)
 
-    def _hybrid_sync_gate(self, obs: Dict[str, Any]) -> tuple[str, str]:
-        if not self.hybrid_enable or float(obs["remaining_budget"]) < self.bandwidth_min:
-            return "free", "rollout_default"
-
-        slot = int(obs.get("slot", 0))
-        periodic_hit = (slot % max(self.hybrid_periodic_k, 1)) == 0
-        certified_safe = int(obs.get("certified_safe", 1)) == 1
-        badness = float(obs.get("twin_badness", 0.0))
-        pred_margin = float(obs.get("pred_margin", 0.0))
-        cert_slack = float(obs.get("cert_slack", 0.0))
-        outage_pressure = max(-pred_margin, 0.0)
-        budget_ratio = float(obs["remaining_budget"]) / max(float(self.cfg["sync"].get("budget", 1.0)), 1e-12)
-
-        high_risk = (
-            (not certified_safe)
-            or badness >= self.hybrid_badness_high
-            or pred_margin <= self.hybrid_margin_low
-            or cert_slack <= 0.0
-            or outage_pressure >= self.hybrid_outage_pressure_threshold
-        )
-        low_risk = (
-            certified_safe
-            and badness <= self.hybrid_badness_low
-            and pred_margin >= self.hybrid_margin_high
-            and cert_slack >= self.hybrid_cert_slack_low
-        )
-
-        if high_risk:
-            if budget_ratio <= self.hybrid_budget_guard_ratio and not periodic_hit:
-                return "force_nosync", "hybrid_budget_guard"
-            return "force_sync", "hybrid_outage_priority"
-        if periodic_hit:
-            return "force_sync", f"hybrid_periodic_refresh_k={self.hybrid_periodic_k}"
-        if low_risk and self.hybrid_force_hold_when_safe:
-            return "force_nosync", "hybrid_secrecy_guard"
-        return "free", "hybrid_transition"
-
     def _diversify_candidates(
         self,
         scored: list[tuple[float, Dict[str, Any]]],
@@ -387,7 +334,6 @@ class RolloutJointController:
         forced_sync_reason = None
         forced_nosync_reason = None
 
-        sync_gate, hybrid_reason = self._hybrid_sync_gate(obs)
         if float(obs["remaining_budget"]) >= self.bandwidth_min:
             aoi = int(obs.get("aoi", 0))
             badness = float(obs.get("twin_badness", 0.0))
@@ -419,23 +365,16 @@ class RolloutJointController:
                 force_sync_only = True
                 forced_sync_reason = "rollout_emergency_force_sync"
             elif (
-                (not self.hybrid_enable)
-                and self.resync_cooldown_aoi > 0
+                self.resync_cooldown_aoi > 0
                 and int(obs.get("slot", 0)) > 0
                 and aoi < self.resync_cooldown_aoi
             ):
                 force_nosync_only = True
                 forced_nosync_reason = "rollout_resync_cooldown"
-            elif (not self.hybrid_enable) and budget_ratio <= self.rollout_budget_guard_ratio:
+            elif budget_ratio <= self.rollout_budget_guard_ratio:
                 force_nosync_only = True
                 forced_nosync_reason = "rollout_budget_guard"
-            elif sync_gate == "force_sync":
-                force_sync_only = True
-                forced_sync_reason = hybrid_reason
-            elif sync_gate == "force_nosync":
-                force_nosync_only = True
-                forced_nosync_reason = hybrid_reason
-            elif (not self.hybrid_enable) and low_risk_hold:
+            elif low_risk_hold:
                 force_nosync_only = True
                 forced_nosync_reason = "rollout_secrecy_guard"
 

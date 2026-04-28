@@ -10,7 +10,7 @@ from analysis.metrics import aggregate_runs_with_ci
 from experiments.common import ROOT, load_config, run_single_episode
 
 
-METHODS = ["periodic", "security_risk", "security_margin", "rollout_joint", "risk_adaptive_hybrid_rollout", "oracle_sync"]
+METHODS = ["periodic", "security_risk", "security_margin", "rollout_joint", "oracle_sync"]
 
 
 def main() -> None:

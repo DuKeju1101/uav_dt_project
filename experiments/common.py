@@ -36,14 +36,6 @@ def run_single_episode(cfg: Dict[str, Any], seed: int, method: str) -> Tuple[pd.
         controller = DecoupledController(cfg, sync_rule="periodic")
     elif method == "random_budgeted":
         controller = RandomBudgetedController(cfg)
-    elif method == "risk_adaptive_hybrid_rollout":
-        hybrid_cfg = copy.deepcopy(cfg)
-        hybrid_cfg.setdefault("control", {})
-        hybrid_cfg["control"]["rollout_hybrid_enable"] = True
-        hybrid_cfg["control"]["rollout_force_sync_if_unsafe"] = False
-        hybrid_cfg["control"]["rollout_force_sync_badness_threshold"] = None
-        hybrid_cfg["control"]["rollout_force_sync_margin_threshold"] = None
-        controller = RolloutJointController(hybrid_cfg, use_oracle_state=False)
     elif method == "rollout_joint":
         controller = RolloutJointController(cfg, use_oracle_state=False)
     elif method == "oracle_sync":
@@ -57,7 +49,7 @@ def run_single_episode(cfg: Dict[str, Any], seed: int, method: str) -> Tuple[pd.
     while not done:
         if method == "decoupled":
             action = controller.act(env, obs)
-        elif method in {"random_budgeted", "rollout_joint", "risk_adaptive_hybrid_rollout", "oracle_sync"}:
+        elif method in {"random_budgeted", "rollout_joint", "oracle_sync"}:
             action = controller.act(env, obs)
         else:
             action = controller.act(env, obs, sync_method=method)

@@ -18,7 +18,6 @@ METHODS = [
     "security_risk",
     "random_budgeted",
     "rollout_joint",
-    "risk_adaptive_hybrid_rollout",
     "oracle_sync",
 ]
 
