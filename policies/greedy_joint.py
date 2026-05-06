@@ -25,6 +25,12 @@ class GreedyJointController:
 
     def choose_sync(self, method: str, obs: Dict[str, Any], slot: int, remaining_budget: float) -> Tuple[bool, float, str, Dict[str, float]]:
         sync_cfg = self.cfg["sync"]
+        if method in {"none", "never", "no_sync"}:
+            extras = {
+                "threshold_value": -1.0,
+                "risk_value": -1.0,
+            }
+            return False, 0.0, "myopic_no_sync", extras
         if method == "full":
             dec = SyncPolicies.full(
                 slot=slot,

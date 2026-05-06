@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from analysis.metrics import aggregate_runs_with_ci
+from analysis.metrics import aggregate_runs_with_ci, paired_comparisons
 from experiments.common import ROOT, load_config, run_single_episode
 
 
@@ -15,7 +15,21 @@ DEFAULT_CONFIGS = [
     str(ROOT / "configs" / "paper_hard.yaml"),
     str(ROOT / "configs" / "scenario_stress.yaml"),
 ]
-DEFAULT_METHODS = ["periodic", "security_risk", "security_margin", "rollout_joint"]
+DEFAULT_METHODS = [
+    "full",
+    "periodic",
+    "aoi_only",
+    "security_risk",
+    "security_margin",
+    "decoupled",
+    "random_budgeted",
+    "myopic_greedy_no_sync",
+    "no_twin",
+    "rollout_fixed_periodic",
+    "rollout_no_sync",
+    "rollout_joint",
+    "oracle_sync",
+]
 
 
 def _save_markdown(df: pd.DataFrame, path: Path) -> None:
@@ -48,7 +62,7 @@ def main() -> None:
                 summary["scenario"] = scenario
                 summary["config_path"] = str(config_path)
                 rows.append(summary)
-                print(f"[done] scenario={scenario} method={method} seed={seed}")
+                print(f"[done] scenario={scenario} method={method} seed={seed}", flush=True)
 
     df = pd.DataFrame(rows)
     df.to_csv(outdir / "all_runs.csv", index=False)
@@ -67,17 +81,28 @@ def main() -> None:
     gains["outage_gain_vs_periodic"] = gains["periodic_outage_prob_mean"] - gains["outage_prob_mean"]
     gains.to_csv(outdir / "summary_with_gains.csv", index=False)
 
+    paired_baselines = [method for method in args.methods if method != "rollout_joint"]
+    paired = paired_comparisons(df, target="rollout_joint", baselines=paired_baselines)
+    paired.to_csv(outdir / "paired_comparisons_rollout_joint.csv", index=False)
+    if not paired.empty:
+        _save_markdown(paired, outdir / "paired_comparisons_rollout_joint.md")
+
     main_table = gains[
         [
             "scenario",
             "method",
             "num_runs",
+            "episode_length_mean",
             "avg_secrecy_rate_mean",
             "avg_secrecy_rate_ci95",
+            "avg_secrecy_rate_ci95_low",
+            "avg_secrecy_rate_ci95_high",
             "outage_prob_mean",
             "outage_prob_ci95",
             "avg_sync_cost_mean",
             "certificate_cover_rate_mean",
+            "certificate_empirical_cover_rate_mean",
+            "certificate_margin_cover_rate_mean",
             "runtime_per_slot_ms_mean",
             "runtime_per_slot_ms_ci95",
             "secrecy_gain_vs_periodic",

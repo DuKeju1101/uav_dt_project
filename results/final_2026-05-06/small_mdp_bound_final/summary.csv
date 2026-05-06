@@ -1,0 +1,2 @@
+config,seed,episode_length,optimal_cumulative_secrecy,optimal_avg_secrecy,num_states_evaluated,num_actions,state_abstraction
+configs/small_mdp_bound_final.yaml,42,4,9.513350220795628,2.378337555198907,56784,72,"rounded_state_dp(pos=0.1,twin=0.01,cov=0.01)"

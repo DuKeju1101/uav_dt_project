@@ -22,15 +22,35 @@ ABLATIONS = {
     "rollout_no_certificate": {"control.lambda_certificate": 0.0},
     "rollout_no_outage": {"control.lambda_outage": 0.0},
     "rollout_no_pending_sync": {"control.lambda_pending_sync": 0.0},
+    "rollout_no_sync_voi": {"control.lambda_sync_voi": 0.0},
+    "rollout_no_badness_penalty": {"control.lambda_badness": 0.0},
+    "rollout_no_margin_bonus": {"control.lambda_margin": 0.0},
+    "rollout_no_safe_hold": {"control.rollout_force_hold_when_safe": False},
+    "rollout_no_emergency_force": {
+        "control.rollout_force_sync_if_unsafe": False,
+        "control.rollout_force_sync_badness_threshold": None,
+        "control.rollout_force_sync_margin_threshold": None,
+    },
+    "rollout_no_budget_guard": {"control.rollout_budget_guard_ratio": 0.0},
+    "rollout_no_resync_cooldown": {"control.rollout_resync_cooldown_aoi": 0},
+    "rollout_fixed_periodic_sync": {"control.rollout_fixed_sync_rule": "periodic"},
+    "rollout_never_sync": {"control.rollout_fixed_sync_rule": "never"},
     "rollout_one_step": {
         "control.rollout_horizon": 1,
         "control.rollout_tail_branching": 1,
         "control.rollout_deep_branching": 1,
     },
+    "rollout_shallow_search": {
+        "control.rollout_branching": 3,
+        "control.rollout_deep_branching": 1,
+        "control.rollout_tail_branching": 1,
+        "control.rollout_min_sync_branching": 1,
+        "control.rollout_min_tail_sync_branching": 0,
+    },
 }
 
 
-def _set_nested(cfg: dict, dotted_key: str, value: float | int) -> None:
+def _set_nested(cfg: dict, dotted_key: str, value: float | int | str | bool | None) -> None:
     keys = dotted_key.split(".")
     ref = cfg
     for key in keys[:-1]:

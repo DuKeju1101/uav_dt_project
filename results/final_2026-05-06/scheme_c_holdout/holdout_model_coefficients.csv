@@ -1,0 +1,12 @@
+feature,coefficient
+bias,0.0
+aoi_norm,0.6218635321660461
+pred_error_radius_norm,0.6154406362843424
+sigma_norm,0.0
+sync_delay,0.0
+failure_prob,0.0
+aoi_x_radius,0.0
+radius_x_sigma,0.0
+aoi_x_sigma,1.0301725713475918
+delay_x_radius,0.8393636016477358
+delay_x_sigma,0.2994256881070559

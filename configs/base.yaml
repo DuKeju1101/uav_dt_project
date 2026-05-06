@@ -31,6 +31,9 @@ eve:
   velocity: [-5.0, -2.0]
   max_speed: 5.5
   speed_noise_std: 0.8
+  adversarial_lookahead_horizon: 2
+  decision_lookahead_horizon: 1
+  adaptive_lookahead_max: 3
 
 sync:
   budget: 28.0
@@ -85,13 +88,13 @@ control:
   lambda_move: 0.002
   lambda_power: 0.01
   lambda_sync: 0.03
-  lambda_outage: 0.75
+  lambda_outage: 0.9
   lambda_certificate: 0.20
   lambda_pending_sync: 0.04
-  lambda_badness: 0.10
+  lambda_badness: 0.2
   lambda_margin: 0.04
   aoi_discount_alpha: 0.05
-  rollout_horizon: 1
+  rollout_horizon: 2
   rollout_gamma: 0.92
   rollout_branching: 6
   rollout_deep_branching: 2

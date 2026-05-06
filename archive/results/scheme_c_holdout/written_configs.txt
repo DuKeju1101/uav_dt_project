@@ -1,5 +1,0 @@
-/home/dkj/research/uav_dt_project/results/scheme_c_holdout/configs/base_holdoutfit.yaml
-/home/dkj/research/uav_dt_project/results/scheme_c_holdout/configs/paper_base_holdoutfit.yaml
-/home/dkj/research/uav_dt_project/results/scheme_c_holdout/configs/paper_hard_holdoutfit.yaml
-/home/dkj/research/uav_dt_project/results/scheme_c_holdout/configs/scenario_hard_holdoutfit.yaml
-/home/dkj/research/uav_dt_project/results/scheme_c_holdout/configs/scenario_stress_holdoutfit.yaml

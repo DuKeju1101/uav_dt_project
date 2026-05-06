@@ -1,5 +1,0 @@
-results/scheme_c_holdout_2026-04-22/configs/base_holdoutfit.yaml
-results/scheme_c_holdout_2026-04-22/configs/paper_base_holdoutfit.yaml
-results/scheme_c_holdout_2026-04-22/configs/paper_hard_holdoutfit.yaml
-results/scheme_c_holdout_2026-04-22/configs/scenario_hard_holdoutfit.yaml
-results/scheme_c_holdout_2026-04-22/configs/scenario_stress_holdoutfit.yaml

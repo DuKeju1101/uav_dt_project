@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from analysis.metrics import paired_comparisons
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,22 +30,39 @@ def _markdown_table(df: pd.DataFrame) -> str:
 
 def _format_main_table(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
-    for col in ["avg_secrecy_rate_mean", "avg_secrecy_rate_ci95", "outage_prob_mean", "outage_prob_ci95", "avg_sync_cost_mean", "certificate_cover_rate_mean", "runtime_per_slot_ms_mean"]:
+    for col in [
+        "avg_secrecy_rate_mean",
+        "avg_secrecy_rate_ci95",
+        "avg_secrecy_rate_ci95_low",
+        "avg_secrecy_rate_ci95_high",
+        "outage_prob_mean",
+        "outage_prob_ci95",
+        "avg_sync_cost_mean",
+        "certificate_cover_rate_mean",
+        "certificate_empirical_cover_rate_mean",
+        "certificate_margin_cover_rate_mean",
+        "runtime_per_slot_ms_mean",
+    ]:
         if col in out.columns:
             out[col] = out[col].map(lambda x: f"{float(x):.4f}" if col != "runtime_per_slot_ms_mean" else f"{float(x):.2f}")
     keep = [
         "scenario",
         "method",
         "num_runs",
+        "episode_length_mean",
         "avg_secrecy_rate_mean",
         "avg_secrecy_rate_ci95",
+        "avg_secrecy_rate_ci95_low",
+        "avg_secrecy_rate_ci95_high",
         "outage_prob_mean",
         "outage_prob_ci95",
         "avg_sync_cost_mean",
         "certificate_cover_rate_mean",
+        "certificate_empirical_cover_rate_mean",
+        "certificate_margin_cover_rate_mean",
         "runtime_per_slot_ms_mean",
     ]
-    return out[keep]
+    return out[[col for col in keep if col in out.columns]]
 
 
 def _normal_cdf(x: float) -> float:
@@ -104,11 +123,11 @@ def _generate_doc(
     holdout_summary = pd.read_csv(holdout_outdir / "holdout_summary.csv")
     small_summary = pd.read_csv(small_mdp_outdir / "summary.csv") if (small_mdp_outdir / "summary.csv").exists() else pd.DataFrame()
 
-    paired_rows = []
-    for scenario in sorted(all_runs["scenario"].unique()):
-        for baseline in ["periodic", "security_risk", "security_margin"]:
-            paired_rows.append(_paired_stats(all_runs, scenario, baseline, "rollout_joint"))
-    paired_df = pd.DataFrame(paired_rows)
+    paired_df = paired_comparisons(
+        all_runs,
+        target="rollout_joint",
+        baselines=["periodic", "security_risk", "security_margin"],
+    )
     paired_csv = readiness_outdir / "paired_comparisons_rollout_joint.csv"
     paired_df.to_csv(paired_csv, index=False)
 
@@ -147,7 +166,19 @@ def _generate_doc(
     lines.append("## 4. 配对比较")
     lines.append("")
     paired_display = paired_df.copy()
-    for col in ["mean_secrecy_gain", "mean_outage_gain", "mean_runtime_delta_ms", "paired_t_stat", "paired_t_pvalue_approx"]:
+    for col in [
+        "mean_diff",
+        "bootstrap_ci95_low",
+        "bootstrap_ci95_high",
+        "paired_t_stat",
+        "paired_t_pvalue_approx",
+        "paired_t_pvalue_holm",
+        "wilcoxon_pvalue",
+        "wilcoxon_pvalue_holm",
+        "cohen_dz",
+        "rank_biserial",
+        "cliffs_delta",
+    ]:
         if col in paired_display.columns:
             paired_display[col] = paired_display[col].map(lambda x: f"{float(x):.4f}")
     lines.append(_markdown_table(paired_display))
@@ -202,7 +233,6 @@ def main() -> None:
             "--train-configs",
             "configs/base.yaml",
             "configs/scenario_hard.yaml",
-            "configs/scenario_stress.yaml",
             "--eval-configs",
             "configs/paper_base.yaml",
             "configs/paper_hard.yaml",
@@ -218,14 +248,19 @@ def main() -> None:
             "rollout_joint",
             "--train-seeds",
             "3",
+            "--train-seed-start",
+            "0",
             "--eval-seeds",
             "1",
             "--eval-seed-start",
-            "20",
+            "100",
             "--alpha",
             "0.05",
             "--calibration-ratio",
             "0.2",
+            "--posthoc-calibration-ratio",
+            "0.5",
+            "--posthoc-calibration-by-scenario",
             "--outdir",
             str(holdout_outdir),
         ]

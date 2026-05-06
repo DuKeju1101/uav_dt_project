@@ -35,6 +35,9 @@ eve:
   - -2.0
   max_speed: 5.5
   speed_noise_std: 0.8
+  adversarial_lookahead_horizon: 2
+  decision_lookahead_horizon: 1
+  adaptive_lookahead_max: 3
 sync:
   budget: 28.0
   full_sync_cost: 1.0
@@ -90,7 +93,7 @@ control:
   lambda_move: 0.002
   lambda_power: 0.01
   lambda_sync: 0.03
-  lambda_outage: 0.75
+  lambda_outage: 0.9
   lambda_certificate: 0.2
   lambda_certificate_relief: 0.35
   lambda_sync_emergency_bonus: 0.12
@@ -101,7 +104,7 @@ control:
   lambda_sync_request: 0.02
   lambda_sync_low_bandwidth: 0.025
   aoi_discount_alpha: 0.05
-  rollout_horizon: 1
+  rollout_horizon: 2
   rollout_gamma: 0.92
   rollout_branching: 6
   rollout_deep_branching: 2
@@ -120,7 +123,7 @@ control:
   rollout_safe_badness_threshold: 0.16
   rollout_safe_margin_threshold: 0.06
   rollout_safe_cert_slack_threshold: 0.08
-  rollout_safe_aoi_threshold: 1
+  rollout_safe_aoi_threshold: 2
   rollout_budget_guard_ratio: 0.35
   rollout_resync_cooldown_aoi: 2
   max_candidates: 324

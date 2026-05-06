@@ -1,7 +1,0 @@
-method,avg_sync_cost_mean,avg_sync_cost_std,avg_twin_quality_mean,avg_twin_quality_std,avg_twin_badness_mean,avg_twin_badness_std,avg_secrecy_rate_mean,avg_secrecy_rate_std,outage_prob_mean,outage_prob_std,success_prob_mean,success_prob_std
-aoi_only,0.125,,0.9298369083744455,,0.07016309162555431,,4.474799755326691,,0.0,,1.0,
-decoupled,0.25,,0.9608991912176045,,0.039100808782395524,,4.474799755326691,,0.0,,1.0,
-full,1.0,,0.992,,0.008,,4.474799755326691,,0.0,,1.0,
-periodic,0.25,,0.9608991912176045,,0.039100808782395524,,4.474799755326691,,0.0,,1.0,
-security_margin,0.0,,0.6652095138649383,,0.3347904861350618,,4.475298802427062,,0.0,,1.0,
-security_risk,0.025,,0.7415467143558159,,0.2584532856441842,,4.475298802427062,,0.0,,1.0,

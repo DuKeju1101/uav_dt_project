@@ -29,6 +29,12 @@ class RolloutJointController:
         self.bandwidth_min = float(self.cfg["sync"].get("bandwidth_min", 0.25))
         self.move_candidate_limit = int(self.cfg["control"].get("rollout_move_candidates", 5))
         self.power_candidate_limit = int(self.cfg["control"].get("rollout_power_candidates", 3))
+        self.single_move_prefilter = int(
+            self.cfg["control"].get(
+                "rollout_single_move_prefilter",
+                max(self.move_candidate_limit, min(len(self.step_moves), 5)),
+            )
+        )
         self.rollout_horizon = int(self.cfg["control"].get("rollout_horizon", 3))
         self.gamma = float(self.cfg["control"].get("rollout_gamma", 0.92))
         self.branching_limit = int(self.cfg["control"].get("rollout_branching", 16))
@@ -79,6 +85,10 @@ class RolloutJointController:
         self.safe_aoi_threshold = int(self.cfg["control"].get("rollout_safe_aoi_threshold", 1))
         self.rollout_budget_guard_ratio = float(self.cfg["control"].get("rollout_budget_guard_ratio", 0.35))
         self.resync_cooldown_aoi = int(self.cfg["control"].get("rollout_resync_cooldown_aoi", 0))
+        self.fixed_sync_rule = str(self.cfg["control"].get("rollout_fixed_sync_rule", "free"))
+        self.fixed_sync_periodic_k = int(
+            self.cfg["control"].get("rollout_fixed_sync_periodic_k", self.cfg["sync"].get("periodic_k", 1))
+        )
         self._eval_cache: dict[tuple[Any, ...], float] = {}
 
     def _state_cache_key(self, env) -> tuple[Any, ...]:
@@ -96,6 +106,8 @@ class RolloutJointController:
             tuple(round(float(x), 3) for x in env.eve.position),
             tuple(round(float(x), 3) for x in env.eve.velocity),
             tuple(round(float(x), 3) for x in env.twin.state),
+            int(env.twin.aoi),
+            round(float(env.twin.sigma), 3),
             round(float(env.twin.last_sync_bandwidth), 3),
             pending,
         )
@@ -159,9 +171,39 @@ class RolloutJointController:
     def _top_move_pairs(self, env, representative_sync_bw: float = 0.0) -> list[tuple[str, str]]:
         proxy_p_s = max(self.p_s_levels)
         proxy_p_j = self.p_j_levels[min(len(self.p_j_levels) - 1, max(0, len(self.p_j_levels) // 2))]
+        candidate_moves = self.step_moves
+        if 0 < self.single_move_prefilter < len(self.step_moves):
+            scored_uav1: list[tuple[float, str]] = []
+            scored_uav2: list[tuple[float, str]] = []
+            for move in self.step_moves:
+                action_uav1 = {
+                    "move_uav1": move,
+                    "move_uav2": "stay",
+                    "p_s": proxy_p_s,
+                    "p_j": proxy_p_j,
+                    "sync": False,
+                    "sync_bandwidth": 0.0,
+                }
+                action_uav2 = {
+                    "move_uav1": "stay",
+                    "move_uav2": move,
+                    "p_s": proxy_p_s,
+                    "p_j": proxy_p_j,
+                    "sync": False,
+                    "sync_bandwidth": 0.0,
+                }
+                scored_uav1.append((self._score_action_cached(env, action_uav1, include_sync_penalty=False), move))
+                scored_uav2.append((self._score_action_cached(env, action_uav2, include_sync_penalty=False), move))
+            scored_uav1.sort(key=lambda item: item[0], reverse=True)
+            scored_uav2.sort(key=lambda item: item[0], reverse=True)
+            selected = {"stay"}
+            selected.update(move for _, move in scored_uav1[: self.single_move_prefilter])
+            selected.update(move for _, move in scored_uav2[: self.single_move_prefilter])
+            candidate_moves = [move for move in self.step_moves if move in selected]
+
         scored_nosync: list[tuple[float, tuple[str, str]]] = []
         scored_sync: list[tuple[float, tuple[str, str]]] = []
-        for move1, move2 in itertools.product(self.step_moves, self.step_moves):
+        for move1, move2 in itertools.product(candidate_moves, candidate_moves):
             action_nosync = {
                 "move_uav1": move1,
                 "move_uav2": move2,
@@ -284,11 +326,20 @@ class RolloutJointController:
         force_sync_only: bool = False,
         force_nosync_only: bool = False,
     ) -> list[tuple[float, Dict[str, Any]]]:
-        scored = self._scored_candidates(env, remaining_budget, self.branching_limit * 3)
-        if force_sync_only:
-            scored = [item for item in scored if float(item[1].get("sync_bandwidth", 0.0)) > 0.0]
-        elif force_nosync_only:
-            scored = [item for item in scored if float(item[1].get("sync_bandwidth", 0.0)) <= 0.0]
+        if force_sync_only or force_nosync_only:
+            actions = self._action_space(env, remaining_budget)
+            if force_sync_only:
+                actions = [action for action in actions if float(action.get("sync_bandwidth", 0.0)) > 0.0]
+            else:
+                actions = [action for action in actions if float(action.get("sync_bandwidth", 0.0)) <= 0.0]
+            scored = [
+                (self._score_action_cached(env, action, include_sync_penalty=True), action)
+                for action in actions
+            ]
+            scored.sort(key=lambda item: item[0], reverse=True)
+            scored = scored[: self.branching_limit * 3]
+        else:
+            scored = self._scored_candidates(env, remaining_budget, self.branching_limit * 3)
         return self._diversify_candidates(
             scored,
             limit=self.branching_limit,
@@ -297,6 +348,20 @@ class RolloutJointController:
 
     def _rollout_value(self, env, depth: int) -> float:
         return self._greedy_tail_value(env, depth)
+
+    def _fixed_sync_gate(self, obs: Dict[str, Any]) -> tuple[str, str]:
+        if self.fixed_sync_rule in {"", "free", "adaptive"}:
+            return "free", "rollout_adaptive_sync"
+        if float(obs["remaining_budget"]) < self.bandwidth_min:
+            return "force_nosync", "fixed_sync_budget_exhausted"
+        if self.fixed_sync_rule == "never":
+            return "force_nosync", "fixed_sync_never"
+        if self.fixed_sync_rule == "periodic":
+            slot = int(obs.get("slot", 0))
+            if (slot % max(self.fixed_sync_periodic_k, 1)) == 0:
+                return "force_sync", f"fixed_periodic_k={self.fixed_sync_periodic_k}"
+            return "force_nosync", f"fixed_periodic_skip_k={self.fixed_sync_periodic_k}"
+        raise ValueError(f"Unknown rollout_fixed_sync_rule: {self.fixed_sync_rule}")
 
     def _diversify_candidates(
         self,
@@ -334,9 +399,17 @@ class RolloutJointController:
         forced_sync_reason = None
         forced_nosync_reason = None
 
-        if float(obs["remaining_budget"]) >= self.bandwidth_min:
+        sync_gate, fixed_sync_reason = self._fixed_sync_gate(obs)
+        if sync_gate == "force_sync":
+            force_sync_only = True
+            forced_sync_reason = fixed_sync_reason
+        elif sync_gate == "force_nosync":
+            force_nosync_only = True
+            forced_nosync_reason = fixed_sync_reason
+
+        if sync_gate == "free" and float(obs["remaining_budget"]) >= self.bandwidth_min:
             aoi = int(obs.get("aoi", 0))
-            badness = float(obs.get("twin_badness", 0.0))
+            badness = float(obs.get("decision_twin_badness", obs.get("twin_badness", 0.0)))
             pred_margin = float(obs.get("pred_margin", 0.0))
             cert_slack = float(obs.get("cert_slack", 0.0))
             unsafe = int(obs.get("certified_safe", 1)) == 0

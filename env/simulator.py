@@ -47,6 +47,8 @@ class UAVSecurityEnv:
         self.bandwidth_min = float(self.cfg["sync"].get("bandwidth_min", 0.25))
         self.default_bandwidth = float(self.cfg["sync"].get("default_bandwidth", self.bandwidth_max))
         self.total_sync_budget = float(self.cfg["sync"]["budget"])
+        twin_cfg = self.cfg.get("twin", {})
+        self.twin_prediction_enabled = bool(twin_cfg.get("prediction_enabled", True))
         self.rng = np.random.default_rng(int(self.cfg.get("seed", 42)))
         self.reset(seed=int(self.cfg.get("seed", 42)))
 
@@ -109,19 +111,10 @@ class UAVSecurityEnv:
         self.rng.bit_generator.state = copy.deepcopy(state["rng_state"])
 
     def get_observation(self) -> Dict[str, Any]:
-        eve_error = float(np.linalg.norm(self.eve.position - self.twin.eve_est))
-        q = twin_quality(
-            aoi=self.twin.aoi,
-            eve_error=eve_error,
-            sigma=self.twin.sigma,
-            a_max=float(self.cfg["metrics"]["a_max"]),
-            d_max=float(self.cfg["metrics"]["d_max"]),
-            sigma_max=float(self.cfg["metrics"]["sigma_max"]),
-            weights=tuple(self.cfg["metrics"]["q_weights"]),
-        )
+        decision_q = self._decision_twin_quality(self.twin)
         pred_radius = predicted_error_radius(
             aoi=self.twin.aoi,
-            v_max=float(np.linalg.norm(self.eve.velocity) + 3 * self.cfg["eve"].get("speed_noise_std", 0.0)),
+            v_max=self._eve_speed_bound(self.twin),
             delta_t=self.delta_t,
         )
         pred_metrics = self.compute_best_metrics(use_twin=True, p_s=1.0, p_j=0.8)
@@ -154,14 +147,13 @@ class UAVSecurityEnv:
             "uav2_pos": self.uav2.position.copy(),
             "bs_pos": self.bs.position.copy(),
             "users": [u.position.copy() for u in self.users],
-            "true_eve_pos": self.eve.position.copy(),
             "twin_eve_pos": self.twin.eve_est.copy(),
             "twin_sigma": float(self.twin.sigma),
             "aoi": int(self.twin.aoi),
             "remaining_budget": float(self.remaining_budget),
             "remaining_budget_ratio": float(self.remaining_budget / max(self.total_sync_budget, 1e-12)),
-            "twin_quality": q["quality"],
-            "twin_badness": q["badness"],
+            "decision_twin_quality": decision_q["quality"],
+            "decision_twin_badness": decision_q["badness"],
             "pred_error_radius": pred_radius,
             "pred_margin": margin,
             "pred_loss_ub": loss_ub,
@@ -193,6 +185,36 @@ class UAVSecurityEnv:
             channel_cfg=self.cfg["channel"],
         )
 
+    def _eve_speed_bound(self, twin: TwinState | None = None) -> float:
+        if twin is None:
+            base_speed = float(np.linalg.norm(self.eve.velocity))
+        else:
+            base_speed = float(np.linalg.norm(twin.eve_vel_est))
+        return base_speed + 3.0 * float(self.cfg["eve"].get("speed_noise_std", 0.0))
+
+    def _decision_twin_quality(self, twin: TwinState) -> Dict[str, float]:
+        proxy_error = predicted_error_radius(
+            aoi=twin.aoi,
+            v_max=self._eve_speed_bound(twin),
+            delta_t=self.delta_t,
+        )
+        return twin_quality(
+            aoi=twin.aoi,
+            eve_error=proxy_error,
+            sigma=twin.sigma,
+            a_max=float(self.cfg["metrics"]["a_max"]),
+            d_max=float(self.cfg["metrics"]["d_max"]),
+            sigma_max=float(self.cfg["metrics"]["sigma_max"]),
+            weights=tuple(self.cfg["metrics"]["q_weights"]),
+        )
+
+    def _advance_twin_without_sync(self, twin: TwinState) -> TwinState:
+        if self.twin_prediction_enabled:
+            return self.twin_tracker.predict(twin)
+        held = twin.copy()
+        held.aoi += 1
+        return held
+
     def _resolve_sync_bandwidth(self, action: Dict[str, Any]) -> float:
         if not bool(action.get("sync", False)):
             return 0.0
@@ -209,10 +231,15 @@ class UAVSecurityEnv:
         uav2_pos: np.ndarray,
         p_s: float,
         p_j: float,
+        start_pos: np.ndarray | None = None,
+        velocity: np.ndarray | None = None,
+        lookahead_horizon: int | None = None,
     ) -> np.ndarray:
+        eve_pos = self.eve.position if start_pos is None else np.asarray(start_pos, dtype=float)
+        eve_velocity = self.eve.velocity if velocity is None else np.asarray(velocity, dtype=float)
         eve_mode = str(self.cfg["eve"].get("mode", "mobile"))
         if eve_mode not in {"adaptive", "adaptive_mobile"}:
-            return clip_area(self.eve.position + self.eve.velocity * self.delta_t, self.area)
+            return clip_area(eve_pos + eve_velocity * self.delta_t, self.area)
 
         move_names = list(
             self.cfg["eve"].get(
@@ -223,18 +250,22 @@ class UAVSecurityEnv:
         max_speed = float(
             self.cfg["eve"].get(
                 "max_speed",
-                max(np.linalg.norm(self.eve.velocity), 1.0),
+                max(np.linalg.norm(eve_velocity), 1.0),
             )
         )
         step_size = max_speed * self.delta_t
-        best_pos = self.eve.position.copy()
-        best_score = None
-        for move_name in move_names:
-            candidate_pos = apply_move(self.eve.position.copy(), move_name, step_size, self.area)
-            score = best_eve_interception_rate(
+        horizon = int(
+            lookahead_horizon
+            if lookahead_horizon is not None
+            else self.cfg["eve"].get("adaptive_lookahead_horizon", 1)
+        )
+        horizon = max(1, min(horizon, int(self.cfg["eve"].get("adaptive_lookahead_max", 3))))
+
+        def score_position(position: np.ndarray) -> float:
+            return best_eve_interception_rate(
                 uav1_pos=uav1_pos,
                 uav2_pos=uav2_pos,
-                eve_pos=candidate_pos,
+                eve_pos=position,
                 user_positions=self.user_positions,
                 p_s=p_s,
                 p_j=p_j,
@@ -244,6 +275,24 @@ class UAVSecurityEnv:
                 noise_power=float(self.cfg["channel"]["noise_power"]),
                 channel_cfg=self.cfg["channel"],
             )
+
+        best_pos = eve_pos.copy()
+        best_score = None
+        for move_name in move_names:
+            candidate_pos = apply_move(eve_pos.copy(), move_name, step_size, self.area)
+            score = score_position(candidate_pos)
+            if horizon > 1:
+                rollout_frontier = [candidate_pos]
+                lookahead_score = score
+                for _ in range(1, horizon):
+                    next_frontier = []
+                    for frontier_pos in rollout_frontier:
+                        for future_move in move_names:
+                            future_pos = apply_move(frontier_pos.copy(), future_move, step_size, self.area)
+                            next_frontier.append(future_pos)
+                            lookahead_score = max(lookahead_score, score_position(future_pos))
+                    rollout_frontier = next_frontier
+                score = lookahead_score
             if best_score is None or score > best_score:
                 best_score = score
                 best_pos = candidate_pos
@@ -265,10 +314,9 @@ class UAVSecurityEnv:
 
     def _project_next_twin(
         self,
-        next_true_eve: np.ndarray,
+        sync_measurement_position: np.ndarray,
         do_sync: bool,
         sync_bandwidth: float,
-        use_true_eve: bool = False,
     ) -> tuple[TwinState, list[Dict[str, float]], bool]:
         projected_twin = self.twin.copy()
         matured_bandwidths, next_pending_queue = self._project_pending_queue(self.pending_syncs)
@@ -276,22 +324,20 @@ class UAVSecurityEnv:
 
         if matured_bandwidths:
             applied_bw = max(matured_bandwidths)
-            projected_twin = self.twin_tracker.expected_sync(projected_twin, next_true_eve, applied_bw)
+            projected_twin = self.twin_tracker.expected_sync(projected_twin, sync_measurement_position, applied_bw)
             sync_applied = True
 
         sync_delay = int(self.cfg["sync"].get("delay_slots", 0))
         if do_sync and sync_bandwidth > 0.0:
             if sync_delay <= 0:
-                projected_twin = self.twin_tracker.expected_sync(projected_twin, next_true_eve, sync_bandwidth)
+                projected_twin = self.twin_tracker.expected_sync(projected_twin, sync_measurement_position, sync_bandwidth)
                 sync_applied = True
             else:
                 next_pending_queue.append({"steps_left": float(sync_delay), "bandwidth": float(sync_bandwidth)})
 
         if not sync_applied:
-            projected_twin = self.twin_tracker.predict(projected_twin)
+            projected_twin = self._advance_twin_without_sync(projected_twin)
 
-        if use_true_eve:
-            projected_twin.eve_est = next_true_eve.copy()
         return projected_twin, next_pending_queue, sync_applied
 
     def evaluate_candidate(
@@ -309,13 +355,36 @@ class UAVSecurityEnv:
 
         next_uav1 = apply_move(self.uav1.position.copy(), move1, float(self.cfg["control"]["step_size"]), self.area)
         next_uav2 = apply_move(self.uav2.position.copy(), move2, float(self.cfg["control"]["step_size"]), self.area)
-        next_true_eve = self._predict_next_eve_position(next_uav1, next_uav2, p_s, p_j)
+        next_true_eve = None
+        if use_true_eve:
+            next_true_eve = self._predict_next_eve_position(
+                next_uav1,
+                next_uav2,
+                p_s,
+                p_j,
+                start_pos=self.eve.position,
+                velocity=self.eve.velocity,
+                lookahead_horizon=int(self.cfg["eve"].get("decision_lookahead_horizon", 1)),
+            )
+            decision_next_eve = next_true_eve
+        else:
+            decision_next_eve = self._predict_next_eve_position(
+                next_uav1,
+                next_uav2,
+                p_s,
+                p_j,
+                start_pos=self.twin.eve_est,
+                velocity=self.twin.eve_vel_est,
+                lookahead_horizon=int(self.cfg["eve"].get("decision_lookahead_horizon", 1)),
+            )
         projected_twin, next_pending_queue, _ = self._project_next_twin(
-            next_true_eve=next_true_eve,
+            sync_measurement_position=decision_next_eve,
             do_sync=do_sync,
             sync_bandwidth=sync_bandwidth,
-            use_true_eve=use_true_eve,
         )
+        if use_true_eve:
+            assert next_true_eve is not None
+            projected_twin.eve_est = next_true_eve.copy()
         est_eve = projected_twin.eve_est.copy()
 
         pred_metrics = best_user_metrics(
@@ -342,7 +411,7 @@ class UAVSecurityEnv:
         pred_margin = adjusted_r_sec - r_min
         pred_radius = predicted_error_radius(
             aoi=projected_twin.aoi,
-            v_max=float(np.linalg.norm(self.eve.velocity) + 3 * self.cfg["eve"].get("speed_noise_std", 0.0)),
+            v_max=self._eve_speed_bound(projected_twin),
             delta_t=self.delta_t,
         )
         cert = robust_secrecy_certificate(
@@ -361,15 +430,19 @@ class UAVSecurityEnv:
                 "sigma": float(self.cfg["metrics"]["sigma_max"]),
             },
         )
-        projected_badness = twin_quality(
-            aoi=projected_twin.aoi,
-            eve_error=float(np.linalg.norm(next_true_eve - est_eve)),
-            sigma=projected_twin.sigma,
-            a_max=float(self.cfg["metrics"]["a_max"]),
-            d_max=float(self.cfg["metrics"]["d_max"]),
-            sigma_max=float(self.cfg["metrics"]["sigma_max"]),
-            weights=tuple(self.cfg["metrics"]["q_weights"]),
-        )["badness"]
+        if use_true_eve:
+            assert next_true_eve is not None
+            projected_badness = twin_quality(
+                aoi=projected_twin.aoi,
+                eve_error=float(np.linalg.norm(next_true_eve - est_eve)),
+                sigma=projected_twin.sigma,
+                a_max=float(self.cfg["metrics"]["a_max"]),
+                d_max=float(self.cfg["metrics"]["d_max"]),
+                sigma_max=float(self.cfg["metrics"]["sigma_max"]),
+                weights=tuple(self.cfg["metrics"]["q_weights"]),
+            )["badness"]
+        else:
+            projected_badness = self._decision_twin_quality(projected_twin)["badness"]
         lambda_outage = float(self.cfg["control"].get("lambda_outage", 0.0))
         lambda_certificate = float(self.cfg["control"].get("lambda_certificate", 0.0))
         lambda_certificate_relief = float(self.cfg["control"].get("lambda_certificate_relief", 0.0))
@@ -399,15 +472,18 @@ class UAVSecurityEnv:
             )
         sync_voi_bonus = 0.0
         if do_sync and lambda_sync_voi > 0.0:
-            current_badness = twin_quality(
-                aoi=self.twin.aoi,
-                eve_error=float(np.linalg.norm(self.eve.position - self.twin.eve_est)),
-                sigma=self.twin.sigma,
-                a_max=float(self.cfg["metrics"]["a_max"]),
-                d_max=float(self.cfg["metrics"]["d_max"]),
-                sigma_max=float(self.cfg["metrics"]["sigma_max"]),
-                weights=tuple(self.cfg["metrics"]["q_weights"]),
-            )["badness"]
+            if use_true_eve:
+                current_badness = twin_quality(
+                    aoi=self.twin.aoi,
+                    eve_error=float(np.linalg.norm(self.eve.position - self.twin.eve_est)),
+                    sigma=self.twin.sigma,
+                    a_max=float(self.cfg["metrics"]["a_max"]),
+                    d_max=float(self.cfg["metrics"]["d_max"]),
+                    sigma_max=float(self.cfg["metrics"]["sigma_max"]),
+                    weights=tuple(self.cfg["metrics"]["q_weights"]),
+                )["badness"]
+            else:
+                current_badness = self._decision_twin_quality(self.twin)["badness"]
             info_gain = max(float(current_badness) - projected_badness, 0.0)
             aoi_pressure = 1.0 + float(self.twin.aoi) / max(float(self.cfg["metrics"]["a_max"]), 1e-12)
             bandwidth_util = float(sync_bandwidth) / max(float(self.bandwidth_max), 1e-12)
@@ -441,7 +517,13 @@ class UAVSecurityEnv:
         noise_std = float(self.cfg["eve"].get("speed_noise_std", 0.0))
         eve_mode = str(self.cfg["eve"].get("mode", "mobile"))
         if eve_mode in {"adaptive", "adaptive_mobile"}:
-            next_pos = self._predict_next_eve_position(self.uav1.position, self.uav2.position, self.uav1.power, self.uav2.power)
+            next_pos = self._predict_next_eve_position(
+                self.uav1.position,
+                self.uav2.position,
+                self.uav1.power,
+                self.uav2.power,
+                lookahead_horizon=int(self.cfg["eve"].get("adversarial_lookahead_horizon", 2)),
+            )
             if noise_std > 0.0:
                 next_pos = next_pos + self.rng.normal(0.0, noise_std, size=2) * self.delta_t
             next_pos = clip_area(next_pos, self.area)
@@ -503,13 +585,16 @@ class UAVSecurityEnv:
             sync_reason = action.get("sync_reason", "no_sync")
 
         if not sync_applied:
-            self.twin = self.twin_tracker.predict(self.twin)
+            self.twin = self._advance_twin_without_sync(self.twin)
 
         true_metrics = self.compute_best_metrics(use_twin=False, p_s=p_s, p_j=p_j)
         pred_metrics = self.compute_best_metrics(use_twin=True, p_s=p_s, p_j=p_j)
         post_obs = self.get_observation()
         realized_loss = max(float(pred_metrics["r_sec"] - true_metrics["r_sec"]), 0.0)
-        cert_cover = int(realized_loss <= float(post_obs["cert_required_margin"] - float(self.cfg["sync"]["rho"])))
+        cert_margin_bound = float(post_obs["cert_required_margin"] - float(self.cfg["sync"]["rho"]))
+        cert_empirical_bound = float(post_obs["cert_empirical_upper_bound"])
+        cert_margin_cover = int(realized_loss <= cert_margin_bound)
+        cert_empirical_cover = int(realized_loss <= cert_empirical_bound)
 
         eve_error = float(np.linalg.norm(self.eve.position - self.twin.eve_est))
         twin_scores = twin_quality(
@@ -563,10 +648,13 @@ class UAVSecurityEnv:
             "cert_base_bound": float(post_obs["cert_base_bound"]),
             "cert_empirical_upper_bound": float(post_obs["cert_empirical_upper_bound"]),
             "cert_required_margin": float(post_obs["cert_required_margin"]),
+            "cert_margin_bound": cert_margin_bound,
             "cert_slack": float(post_obs["cert_slack"]),
             "certified_safe": int(post_obs["certified_safe"]),
             "realized_loss": float(realized_loss),
-            "cert_cover": int(cert_cover),
+            "cert_cover": int(cert_empirical_cover),
+            "cert_empirical_cover": int(cert_empirical_cover),
+            "cert_margin_cover": int(cert_margin_cover),
             "r_b": true_metrics["r_b"],
             "r_e": true_metrics["r_e"],
             "outage": outage,
