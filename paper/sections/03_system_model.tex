@@ -1,0 +1,81 @@
+\section{System Model}
+\label{sec:model}
+
+\subsection{Network and mobility model}
+
+We consider a time-slotted UAV-assisted secure communication system indexed by $t=0,1,\ldots,T-1$. The service area contains a set of ground users $\mathcal{U}$, two cooperative UAVs, and a mobile eavesdropper Eve. UAV 1 acts as the confidential transmitter and UAV 2 acts as a cooperative jammer. The UAV altitude is fixed at $H$, while horizontal positions evolve in a two-dimensional rectangular area. The horizontal positions of UAV 1, UAV 2, user $u$, and Eve at slot $t$ are denoted by $\mathbf{q}_1(t)$, $\mathbf{q}_2(t)$, $\mathbf{w}_u$, and $\mathbf{e}(t)$, respectively.
+
+The UAVs choose movement commands from a finite action set such as staying, moving up, down, left, or right. Each non-stationary movement changes the horizontal position by the configured step size and is clipped to the service region. Eve follows an adaptive mobile process in the simulator with bounded speed and random motion perturbations. The controller does not directly observe $\mathbf{e}(t)$ at all times; it observes a digital-twin estimate described below.
+
+\subsection{Air-to-ground channel and secrecy rate}
+
+For a horizontal transmitter-receiver pair $(\mathbf{x},\mathbf{y})$, the three-dimensional distance is
+\begin{equation}
+    d(\mathbf{x},\mathbf{y})=
+    \sqrt{\|\mathbf{x}-\mathbf{y}\|_2^2+H^2}.
+\end{equation}
+The large-scale channel gain used by the simulator is
+\begin{equation}
+    g(\mathbf{x},\mathbf{y})=
+    \frac{\beta_0}{d(\mathbf{x},\mathbf{y})^\alpha}\eta(\mathbf{x},\mathbf{y}),
+\end{equation}
+where $\beta_0$ is a reference gain, $\alpha$ is the path-loss exponent, and $\eta(\mathbf{x},\mathbf{y})$ is an optional probabilistic line-of-sight attenuation factor. In the final scenarios, the simulator uses a probabilistic LoS model with LoS and NLoS attenuation parameters from the configuration files.
+
+For a selected user $u$, source power $p_s(t)$, and jamming power $p_j(t)$, the legitimate rate and eavesdropping rate are
+\begin{align}
+    R_b(t,u) &=
+    \log_2\left(1+
+    \frac{p_s(t)g(\mathbf{q}_1(t),\mathbf{w}_u)}
+    {\sigma_n^2+\xi p_j(t)g(\mathbf{q}_2(t),\mathbf{w}_u)}
+    \right), \\
+    R_e(t,u) &=
+    \log_2\left(1+
+    \frac{p_s(t)g(\mathbf{q}_1(t),\mathbf{e}(t))}
+    {\sigma_n^2+p_j(t)g(\mathbf{q}_2(t),\mathbf{e}(t))}
+    \right),
+\end{align}
+where $\sigma_n^2$ is noise power and $\xi$ models residual interference from the friendly jammer at the legitimate receiver. The instantaneous secrecy rate for user $u$ is
+\begin{equation}
+    R_s(t,u)=\left[R_b(t,u)-R_e(t,u)\right]^+.
+\end{equation}
+The simulator serves the user with the best resulting secrecy metric at each slot, and the reported slot secrecy rate is denoted by $R_s(t)$. The average secrecy rate is
+\begin{equation}
+    \bar{R}_s=\frac{1}{T}\sum_{t=0}^{T-1}R_s(t).
+\end{equation}
+
+\subsection{Digital twin and synchronization}
+
+The controller maintains a digital twin of Eve's state. The twin contains an estimated Eve position $\hat{\mathbf{e}}(t)$, an age-of-information value $A(t)$, an uncertainty scale $\sigma(t)$, and derived quality and badness indicators. If no synchronization is applied, the twin prediction evolves forward and its age and uncertainty increase. If synchronization is requested with bandwidth $b_t>0$, a portion of the finite synchronization budget is consumed. The update may be delayed by the configured number of slots and may fail with a configured probability. Higher bandwidth reduces measurement noise but consumes more budget.
+
+The synchronization decision is therefore a value-of-information decision. Synchronizing too often can exhaust the budget and reduce future flexibility. Synchronizing too rarely can make the controller act on a stale eavesdropper estimate, leading to optimistic secrecy predictions and increased outage.
+
+\subsection{Action space and objective metrics}
+
+At each slot the controller selects
+\begin{equation}
+    a_t=(b_t,m_{1,t},m_{2,t},p_s(t),p_j(t)),
+\end{equation}
+where $b_t$ is the synchronization bandwidth, $m_{1,t}$ and $m_{2,t}$ are the UAV movement commands, and $p_s(t)$ and $p_j(t)$ are source and jamming power levels. The feasible sets are finite in the simulator. The synchronization bandwidth set includes zero and several positive bandwidth levels, while power levels are selected from configured discrete sets.
+
+We evaluate policies using five metrics:
+\begin{itemize}
+    \item average secrecy rate $\bar{R}_s$, where higher is better;
+    \item secrecy outage probability
+    \begin{equation}
+        P_{\mathrm{out}}=\frac{1}{T}\sum_{t=0}^{T-1}\mathbb{I}\{R_s(t)<R_{\min}\},
+    \end{equation}
+    where lower is better;
+    \item average synchronization cost, which measures synchronization-budget consumption;
+    \item certificate cover rate, which measures whether the fitted secrecy-loss upper bound covers realized loss;
+    \item runtime per slot, which measures decision-time cost.
+\end{itemize}
+
+The final calibrated stress scenario uses $R_{\min}=1.10$. This value was chosen after calibration because the earlier threshold made every evaluated method remain in outage, which removed the ability to compare methods by outage probability. The base and hard scenarios retain their configured thresholds and remain useful for testing whether the controller is competitive under different operating regimes.
+
+\subsection{Twin-induced secrecy loss}
+
+Let $\widehat{R}_s(t)$ be the secrecy value predicted from the twin state and $R_s(t)$ be the realized secrecy value under the true Eve state. We define the realized secrecy loss as a nonnegative measure of twin optimism,
+\begin{equation}
+    L(t)=\left[\widehat{R}_s(t)-R_s(t)\right]^+.
+\end{equation}
+The controller uses a fitted upper bound $\widehat{L}_{\mathrm{ub}}(t)$ constructed from twin age, predicted error radius, uncertainty scale, synchronization delay, and failure probability. A candidate action is considered safer when its predicted secrecy margin exceeds the required threshold plus this empirical upper bound. This produces a certificate slack term used by the proposed controller.

@@ -1,0 +1,85 @@
+\section{Proposed Method}
+\label{sec:method}
+
+\subsection{Design rationale}
+
+The proposed method is built around two observations. First, synchronization is not an isolated maintenance operation. Its value depends on how the updated twin will change motion, source-power, and jamming decisions over the next few slots. Second, a high twin-predicted secrecy rate can be misleading when the twin is stale or uncertain. The controller should therefore prefer actions that are good under the twin and also have sufficient margin against twin-induced secrecy loss.
+
+We implement this idea through a certificate-aware rollout controller. The rollout controller searches over joint synchronization-control actions and evaluates their short-horizon consequences. The empirical certificate supplies a risk penalty and discourages candidate actions whose predicted secrecy margin is not supported by the fitted upper bound.
+
+\subsection{Holdout-fitted secrecy-loss certificate}
+
+The secrecy-loss certificate estimates an upper bound on $L(t)=[\widehat{R}_s(t)-R_s(t)]^+$. The fitted model uses features derived from the digital twin:
+\begin{equation}
+    \phi(t)=
+    [1,A(t),\hat{d}_e(t),\sigma(t),D_{\mathrm{sync}},p_{\mathrm{fail}},\ldots],
+\end{equation}
+where $A(t)$ is twin age, $\hat{d}_e(t)$ is the predicted error radius, $\sigma(t)$ is the uncertainty scale, $D_{\mathrm{sync}}$ is synchronization delay, and $p_{\mathrm{fail}}$ is failure probability. Interaction features such as age-radius and radius-uncertainty products are also used in the implementation.
+
+The fitted loss model has the form
+\begin{equation}
+    \widehat{L}(t)=\left[\theta^\mathsf{T}\phi(t)\right]^+.
+\end{equation}
+A calibration residual quantile is added to obtain
+\begin{equation}
+    \widehat{L}_{\mathrm{ub}}(t)=\widehat{L}(t)+c_{\mathrm{cal}},
+\end{equation}
+where $c_{\mathrm{cal}}$ is determined on a held-out calibration split. This construction is inspired by distribution-free predictive inference and conformal calibration \cite{lei2018conformal,tibshirani2019covariate}, but the claim made here is deliberately narrower: we validate the bound empirically on held-out simulated trajectories drawn from the evaluated policy and scenario distributions.
+
+For a candidate action, let $\widehat{M}(t)$ be the predicted secrecy margin relative to the outage threshold. The certificate slack is
+\begin{equation}
+    S_{\mathrm{cert}}(t)=\widehat{M}(t)-\rho-\widehat{L}_{\mathrm{ub}}(t),
+\end{equation}
+where $\rho$ is an additional safety margin. Negative slack means that the twin-predicted margin is not large enough after accounting for estimated secrecy loss.
+
+\subsection{Joint rollout action scoring}
+
+At each slot, \texttt{rollout\_joint} constructs a candidate set $\mathcal{A}_t$ from synchronization bandwidths, movement pairs, and power levels. Each candidate action is evaluated by applying a one-step prediction and then a finite-horizon rollout. The immediate score is
+\begin{align}
+    r_{\mathrm{score}}(s_t,a_t) =
+    &\ \widehat{R}_s(t)
+    -\lambda_{\mathrm{out}}\widehat{I}_{\mathrm{out}}(t)
+    -\lambda_{\mathrm{sync}} b_t
+    -\lambda_{\mathrm{pow}}(p_s(t)+p_j(t)) \nonumber \\
+    &-\lambda_{\mathrm{cert}}[ -S_{\mathrm{cert}}(t)]^+
+    -\lambda_{\mathrm{bad}}B_{\mathrm{twin}}(t),
+\end{align}
+where $\widehat{I}_{\mathrm{out}}(t)$ is the predicted outage indicator, $B_{\mathrm{twin}}(t)$ is a twin-badness term, and the $\lambda$ coefficients are specified in the scenario configuration. The controller then selects
+\begin{equation}
+    a_t^\star=\arg\max_{a_t\in\mathcal{A}_t}
+    \left\{
+    r_{\mathrm{score}}(s_t,a_t)+\gamma V_H(s_{t+1})
+    \right\},
+\end{equation}
+where $\gamma$ is the rollout discount factor and $V_H$ is the approximate value of the remaining rollout horizon. Candidate pruning is used to make the search tractable.
+
+\begin{algorithm}[t]
+\caption{Certificate-aware joint rollout controller}
+\label{alg:rollout}
+\begin{algorithmic}[1]
+\State Observe twin state, remaining synchronization budget, UAV states, and pending updates.
+\State Build feasible synchronization, movement, source-power, and jamming-power candidates.
+\For{each candidate action $a_t\in\mathcal{A}_t$}
+    \State Predict the next twin state and physical control effect.
+    \State Compute predicted secrecy rate, outage indicator, and certificate slack.
+    \State Evaluate immediate certificate-aware score.
+    \State Estimate finite-horizon rollout value with pruned successor candidates.
+\EndFor
+\State Select the action with the largest immediate-plus-rollout score.
+\State Apply the selected action in the simulator and update pending synchronization state.
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Baselines and diagnostic variants}
+
+The experiments compare \texttt{rollout\_joint} with several baselines.
+
+\texttt{periodic} synchronizes at a fixed period and uses greedy communication control. It is simple, stable, and computationally inexpensive. \texttt{security\_risk} triggers synchronization with a weighted score based on age, uncertainty, predicted margin, and budget pressure. \texttt{security\_margin} uses the certificate margin to trigger synchronization when the twin-predicted secrecy margin appears insufficient. \texttt{decoupled} separates synchronization from motion and power control.
+
+The SCA baselines represent local optimization inspired by common nonconvex wireless optimization practice \cite{boyd2004convex}. \texttt{sca\_twin} uses deployable twin information, while \texttt{sca\_oracle} uses true Eve information in the score and is therefore diagnostic. The PPO baseline follows the PPO policy-gradient paradigm \cite{schulman2017ppo}; in this paper it is intentionally described as lightweight because it is trained for 200 episodes rather than extensively tuned.
+
+The strengthening suite includes additional diagnostic variants. \texttt{oracle\_sync} uses the true Eve state inside the rollout score and is treated as an upper-reference method. \texttt{rollout\_fixed\_periodic} keeps rollout motion and power search but replaces adaptive synchronization with fixed periodic synchronization. \texttt{no\_twin} disables effective twin prediction, and \texttt{rollout\_no\_sync} disables synchronization while keeping rollout search. These variants identify whether the proposed gain comes from rollout search alone or from the joint use of synchronization, twin prediction, and certificate-aware scoring.
+
+\subsection{Computational implications}
+
+The proposed method is more expensive than rule-based policies because it enumerates a joint action space and performs finite-horizon lookahead. This is a deliberate tradeoff: the method is designed to test whether joint synchronization-control optimization improves secrecy and outage, not to minimize inference latency. Runtime is therefore reported as a first-class experimental metric. Deployment would require either edge-assisted execution, a slower decision timescale, or future acceleration through learned value approximators, parallel candidate evaluation, or stronger pruning.

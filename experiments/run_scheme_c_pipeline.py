@@ -39,12 +39,18 @@ def _format_main_table(df: pd.DataFrame) -> pd.DataFrame:
         "outage_prob_ci95",
         "avg_sync_cost_mean",
         "certificate_cover_rate_mean",
+        "certificate_in_policy_cover_rate_mean",
         "certificate_empirical_cover_rate_mean",
         "certificate_margin_cover_rate_mean",
         "runtime_per_slot_ms_mean",
     ]:
         if col in out.columns:
             out[col] = out[col].map(lambda x: f"{float(x):.4f}" if col != "runtime_per_slot_ms_mean" else f"{float(x):.2f}")
+    in_policy_cover_col = (
+        "certificate_in_policy_cover_rate_mean"
+        if "certificate_in_policy_cover_rate_mean" in out.columns
+        else "certificate_cover_rate_mean"
+    )
     keep = [
         "scenario",
         "method",
@@ -57,7 +63,7 @@ def _format_main_table(df: pd.DataFrame) -> pd.DataFrame:
         "outage_prob_mean",
         "outage_prob_ci95",
         "avg_sync_cost_mean",
-        "certificate_cover_rate_mean",
+        in_policy_cover_col,
         "certificate_empirical_cover_rate_mean",
         "certificate_margin_cover_rate_mean",
         "runtime_per_slot_ms_mean",
@@ -142,6 +148,7 @@ def _generate_doc(
     lines.append("3. 主表场景：`paper_base`、`paper_hard`、`scenario_stress`。")
     lines.append("4. 主表方法：`periodic`、`security_risk`、`security_margin`、`rollout_joint`。")
     lines.append("5. 验证 seed：`62-81`。")
+    lines.append("6. Holdout certificate 的 train/eval 方法集合保持一致：`periodic`、`security_risk`、`security_margin`、`rollout_joint`。")
     lines.append("")
     lines.append("结果文件：")
     lines.append(f"1. [summary.csv](../{readiness_outdir.relative_to(ROOT)}/summary.csv)")
@@ -156,12 +163,16 @@ def _generate_doc(
     lines.append("")
     lines.append(_markdown_table(_format_main_table(main_table)))
     lines.append("")
+    lines.append("解释边界：`certificate_in_policy_cover_rate_mean` 是 controller 与 certificate 耦合后的 in-policy 覆盖/合规指标，因为同一个 certificate slack 也进入控制器打分；它不应单独表述为 out-of-distribution certificate 泛化能力。")
+    lines.append("")
     lines.append("## 3. Holdout 证书覆盖")
     lines.append("")
     holdout_display = holdout_summary.copy()
     for col in ["cover_rate", "mean_upper_minus_loss", "p90_upper_minus_loss", "avg_realized_loss"]:
         holdout_display[col] = holdout_display[col].map(lambda x: f"{float(x):.4f}")
     lines.append(_markdown_table(holdout_display))
+    lines.append("")
+    lines.append("Holdout 解释边界：该表用于检查 secrecy-loss upper bound 在独立 seed/场景轨迹上的覆盖情况。若重新拟合 certificate，train/eval 方法集合应保持一致，避免由弱方法训练、强方法验证造成的分布漂移。")
     lines.append("")
     lines.append("## 4. 配对比较")
     lines.append("")
@@ -204,8 +215,20 @@ def _generate_doc(
     lines.append("## 6. 结论摘要")
     lines.append("")
     lines.extend(scenario_rows)
-    lines.append("2. 如果 `rollout_joint` 在某些场景 secrecy 最优但 outage 不是最优，这说明方案 C 更适合写成性能-成本-鲁棒性 tradeoff 叙事。")
-    lines.append("3. 如果 holdout `cover_rate` 接近设定覆盖率以上，conformal certificate 的统计保证叙事可以保留到论文正文。")
+    stress = summary[summary["scenario"].astype(str).str.contains("scenario_stress")].copy()
+    if not stress.empty and float(stress["outage_prob_mean"].max() - stress["outage_prob_mean"].min()) <= 1e-12:
+        lines.append("2. `scenario_stress` 的 outage 在所有方法间无区分度，正文应强调 secrecy-rate 差异，而不是声称该场景降低 outage。")
+    paper_base = summary[summary["scenario"].astype(str).str.contains("paper_base")].copy()
+    if {"rollout_joint", "periodic"}.issubset(set(paper_base["method"].astype(str))):
+        pb_rollout = paper_base[paper_base["method"] == "rollout_joint"].iloc[0]
+        pb_periodic = paper_base[paper_base["method"] == "periodic"].iloc[0]
+        secrecy_gain = float(pb_rollout["avg_secrecy_rate_mean"]) - float(pb_periodic["avg_secrecy_rate_mean"])
+        runtime_ratio = float(pb_rollout["runtime_per_slot_ms_mean"]) / max(float(pb_periodic["runtime_per_slot_ms_mean"]), 1e-12)
+        lines.append(
+            f"3. `paper_base` 是 low-stress tradeoff：`rollout_joint` secrecy gain 为 {secrecy_gain:.4f}，runtime 约为 periodic 的 {runtime_ratio:.1f} 倍，正文不应把它作为主要收益场景。"
+        )
+    lines.append("4. 如果 `rollout_joint` 在某些场景 secrecy 最优但 outage 不是最优，这说明方案 C 更适合写成性能-成本-鲁棒性 tradeoff 叙事。")
+    lines.append("5. Holdout `cover_rate` 接近设定覆盖率以上时，只能支持当前策略分布下的 certificate 覆盖/合规叙事；若要写泛化能力，需要额外的去耦验证。")
     lines.append("")
 
     doc_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -240,7 +263,8 @@ def main() -> None:
             "--train-methods",
             "periodic",
             "security_risk",
-            "aoi_only",
+            "security_margin",
+            "rollout_joint",
             "--eval-methods",
             "periodic",
             "security_risk",

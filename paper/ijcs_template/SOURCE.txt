@@ -1,0 +1,17 @@
+Downloaded from Wiley Author Services official template URL:
+
+https://authorservices.wiley.com/asset/WileyNJDv5_Template.zip
+
+Downloaded on: 2026-05-14
+
+Notes:
+- This is Wiley's New Journal Design / LaTeX authoring template package.
+- The extracted package contains:
+  - Author-guidelines for LaTex Template_Wiley (2026).pdf
+  - Optimal-Design-layout/Optimal-Design-layout.tex
+  - Optimal-Design-layout/USG.cls
+  - Optimal-Design-layout/wileyNJD-Chicago.bst
+  - Optimal-Design-layout/wileyNJD-Chicago-lastoo.bst
+  - supporting .sty files, fonts, and example images.
+- For International Journal of Communication Systems, verify final reference style,
+  font, and column options against the journal author guidelines before submission.

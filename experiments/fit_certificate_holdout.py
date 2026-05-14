@@ -189,7 +189,11 @@ def main() -> None:
     parser.add_argument("--train-configs", nargs="+", required=True)
     parser.add_argument("--eval-configs", nargs="+", required=True)
     parser.add_argument("--outdir", type=str, default=str(ROOT / "results" / "certificate_holdout"))
-    parser.add_argument("--train-methods", nargs="+", default=["periodic", "security_risk", "aoi_only"])
+    parser.add_argument(
+        "--train-methods",
+        nargs="+",
+        default=["periodic", "security_risk", "security_margin", "rollout_joint"],
+    )
     parser.add_argument("--eval-methods", nargs="+", default=["periodic", "security_risk", "security_margin", "rollout_joint"])
     parser.add_argument("--train-seeds", type=int, default=2)
     parser.add_argument("--train-seed-start", type=int, default=0)

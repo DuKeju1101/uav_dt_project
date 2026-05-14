@@ -155,15 +155,17 @@ Eve 是窃听者。项目中的 Eve 不是固定不动的，也不是简单直�
 | --- | ---: | ---: | ---: | ---: | --- |
 | `paper_base` | 120 | 28.0 | 5.5 | 2.55 | 基础场景 |
 | `paper_hard` | 140 | 22.0 | 6.6 | 2.72 | 困难场景 |
-| `scenario_stress` | 160 | 19.0 | 7.8 | 2.82 | 压力场景 |
+| `scenario_stress` | 160 | 19.0 | 7.8 | 1.10 | 压力场景，门限按可达性校准 |
 
 从 base 到 stress：
 
 1. Eve 更快。
 2. 同步预算更少。
-3. 安全门限更高。
+3. Eve 更接近通信热点，且信道/同步不确定性更强。
 4. episode 更长。
 5. 数字孪生不确定性更强。
+
+说明：`scenario_stress` 旧版曾使用 `r_min = 2.82`。诊断发现该门限高于该场景下代表性方法甚至 oracle 的可达时隙保密速率，导致所有方法 `outage_prob = 1.0`。当前版本将压力场景门限校准为 `1.10`，使 outage 既有压力又有区分度。
 
 这意味着 stress 场景不是为了让方法“好看”，而是为了检验方法边界。
 
@@ -529,7 +531,7 @@ loss_bound = k1 * pred_error_radius + k2 * sigma + k3 * aoi
 | `avg_secrecy_rate_mean` | 多 seed 平均真实保密速率 | 越大越好 |
 | `outage_prob_mean` | 低于安全门限的时隙比例 | 越小越好 |
 | `avg_sync_cost_mean` | 平均同步资源消耗 | 越小越省 |
-| `certificate_cover_rate_mean` | 证书上界覆盖真实 loss 的比例 | 越接近目标覆盖率越好 |
+| `certificate_in_policy_cover_rate_mean` | controller 使用 certificate 后的 in-policy 覆盖/合规比例 | 只能说明当前策略分布下的合规情况 |
 | `runtime_per_slot_ms_mean` | 每个时隙平均决策时间 | 越小越快 |
 | `secrecy_gain_vs_periodic` | 相对 periodic 的 secrecy 提升 | 越大越好 |
 

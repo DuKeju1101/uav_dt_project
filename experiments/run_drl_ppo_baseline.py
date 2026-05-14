@@ -212,7 +212,7 @@ def main() -> None:
         "avg_secrecy_rate_ci95_high",
         "outage_prob_mean",
         "avg_sync_cost_mean",
-        "certificate_cover_rate_mean",
+        "certificate_in_policy_cover_rate_mean",
         "certificate_empirical_cover_rate_mean",
         "certificate_margin_cover_rate_mean",
         "runtime_per_slot_ms_mean",

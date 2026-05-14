@@ -1,0 +1,79 @@
+\makeatletter
+\def\input@path{{ijcs_template/Optimal-Design-layout/}}
+\makeatother
+\documentclass[ASNA,twocolumn]{USG}
+
+\usepackage{anyfontsize}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+
+\graphicspath{{figures/}{ijcs_template/Optimal-Design-layout/images/}}
+
+\articletype{RESEARCH ARTICLE}
+\received{}
+\revised{}
+\accepted{}
+\journal{International Journal of Communication Systems}
+\volume{0}
+\copyyear{2026}
+\startpage{1}
+\articledoi{}
+
+\begin{document}
+
+\title{Digital-Twin-Aware Joint Synchronization and Control for Secure UAV Communication Systems}
+\transtitle{Digital-Twin-Aware Joint Synchronization and Control for Secure UAV Communication Systems}
+
+\author[1]{Author One}
+\author[1]{Author Two}
+\author[1]{Corresponding Author}
+
+\authormark{AUTHOR \textsc{et al.}}
+\titlemark{Digital-Twin-Aware Secure UAV Communication}
+
+\address[1]{\orgdiv{Department to be provided, }\orgname{University to be provided, }%
+\orgaddress{\state{Province to be provided, }\country{China}}}
+
+\corres{Corresponding Author (\email{corresponding.author@example.com})}
+
+\fundingInfo{Funding information will be inserted here.}
+
+\keywords{UAV communication | digital twin | physical-layer security | secrecy outage | synchronization control | rollout control}
+\transkeywords{UAV communication | digital twin | physical-layer security | secrecy outage | synchronization control | rollout control}
+
+\abstract[ABSTRACT]{Secure unmanned aerial vehicle (UAV) communication must often be performed with imperfect knowledge of mobile eavesdroppers. Digital twins provide a natural mechanism for maintaining such state information, but synchronization consumes communication resources and stale twins can mislead trajectory, power, and jamming decisions. This paper studies a digital-twin-aware secure UAV communication system with two cooperative UAVs, multiple ground users, a mobile eavesdropper, and budget-limited twin synchronization. We formulate a joint synchronization and control problem and propose a certificate-aware rollout controller that jointly selects synchronization bandwidth, UAV motion, source power, and cooperative jamming power. To quantify the risk caused by twin uncertainty, we fit an empirical secrecy-loss certificate with a train/calibration/validation separation and use its slack in the control score. Multi-seed simulations are conducted on base, hard, and calibrated stress scenarios. In the 20-seed stress scenario, the proposed controller improves average secrecy rate over fixed periodic synchronization from 0.9858 to 1.2540 and reduces secrecy outage from 0.6434 to 0.4294. Holdout validation cover rates are 0.9873, 1.0000, and 1.0000 for the base, hard, and stress groups, respectively. Additional holdout-fitted stress experiments show that the proposed method outperforms SCA-based baselines, a lightweight PPO baseline, no-twin rollout, no-synchronization rollout, and fixed-period rollout, while remaining below an oracle-state upper reference. The results indicate that secrecy-aware digital-twin synchronization should be optimized jointly with communication control, although the current rollout implementation incurs substantially higher per-slot runtime than rule-based baselines.}
+
+\maketitle
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_system_model}
+\input{sections/04_method}
+\input{sections/05_experiments}
+\input{sections/06_discussion}
+\input{sections/07_conclusion}
+
+\bmsubsection*{Author Contributions}
+The author contribution statement will be completed before submission.
+
+\bmsubsection*{Acknowledgments}
+The authors thank the developers and maintainers of the simulation tools used in this study. Detailed funding and institutional acknowledgments will be completed before submission.
+
+\bmsubsection*{Financial Disclosure}
+None reported.
+
+\bmsubsection*{Conflicts of Interest}
+The authors declare no conflicts of interest.
+
+\bmsubsection*{Data Availability Statement}
+The simulation code, configurations, and result tables are maintained in the project repository. The numerical values reported in this manuscript are derived from the result files under \texttt{results/final\_2026-05-12/}.
+
+\bibliography{refs}
+
+\end{document}

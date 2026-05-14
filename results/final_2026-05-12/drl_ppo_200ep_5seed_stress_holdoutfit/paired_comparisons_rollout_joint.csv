@@ -1,0 +1,3 @@
+scenario,target,baseline,metric,num_pairs,mean_diff,bootstrap_ci95_low,bootstrap_ci95_high,paired_t_stat,paired_t_pvalue_approx,wilcoxon_pvalue,wilcoxon_stat,cohen_dz,rank_biserial,cliffs_delta,win_pairs,loss_pairs,tie_pairs,paired_t_pvalue_holm,paired_t_pvalue_bonferroni,wilcoxon_pvalue_holm,wilcoxon_pvalue_bonferroni
+scenario_stress_holdoutfit,rollout_joint,periodic,avg_secrecy_rate,5,0.2603638313412519,0.21749304275067552,0.3032346199318283,10.301608719185623,0.0,0.0625,0.0,4.607019474740718,1.0,1.0,5,0,0,0.0,0.0,0.125,0.125
+scenario_stress_holdoutfit,rollout_joint,ppo_baseline,avg_secrecy_rate,5,0.9116661844768752,0.9060336074826921,0.9169773547187411,290.24205068690225,0.0,0.0625,0.0,129.80019105297058,1.0,1.0,5,0,0,0.0,0.0,0.125,0.125

@@ -1,0 +1,29 @@
+\section{Related Work}
+\label{sec:related}
+
+\subsection{UAV communication and FANET systems}
+
+UAV-enabled wireless communication has been widely studied because aerial platforms can provide on-demand coverage, relay support, flexible topology control, and rapid deployment in infrastructure-limited scenarios \cite{zeng2016uav,mozaffari2019tutorial}. Channel geometry, altitude, energy constraints, mobility, and interference are central design factors. The altitude-dependent coverage model in \cite{alhourani2014optimal}, for example, illustrates that UAV placement has a direct effect on link quality. FANET research further considers multiple UAVs with fast topology changes and mission-oriented networking constraints \cite{lakew2020fanet}. Within the target journal, energy-efficient FANET routing \cite{oubbati2019ecad}, mission-oriented UAV swarm fault tolerance \cite{wang2021fault}, and UAV simulation tools \cite{jiang2024simulation} show that communication-system-level modeling and reproducible simulation remain important research directions.
+Recent IJCS work has also considered UAV-assisted anti-jamming and proactive handoff with deep-learning support \cite{unnisa2023antijamming}, which is close to the present paper's emphasis on adversarial wireless environments.
+
+The present work is related to this literature but has a different focus. We do not study multi-hop FANET routing or swarm task allocation. Instead, we study a secure communication control problem in which two cooperative UAVs must serve users and jam an eavesdropper while maintaining a synchronized digital twin of the adversarial state.
+
+\subsection{Physical-layer security for UAV communications}
+
+Physical-layer security originates from information-theoretic secrecy models such as the wiretap channel \cite{wyner1975wiretap} and broadcast channels with confidential messages \cite{csiszar1978broadcast}. In UAV systems, secrecy depends heavily on geometry because UAV mobility changes the legitimate and eavesdropping channel gains. Joint trajectory and power optimization has therefore become a common approach. Zhang et al. \cite{zhang2019securing} optimized UAV trajectory and transmit power for secure UAV communication. Cooperative jamming has also been introduced to improve secrecy; Zhong et al. \cite{zhong2019cooperative} studied a two-UAV setting with a transmitter UAV and a jammer UAV, while Zhou et al. \cite{zhou2018unknown} considered a friendly UAV jammer when the eavesdropper location is uncertain. Sun et al. \cite{sun2019aerial} further examined aerial cooperative jamming with joint trajectory and power control.
+
+These works motivate our use of trajectory, transmit power, and jamming power as control variables. The key distinction is the information state. Rather than assuming a fixed eavesdropper state or a one-shot uncertainty set, we model a digital twin whose quality evolves according to synchronization decisions. Consequently, secrecy performance depends not only on the physical trajectory and power allocation, but also on whether the controller has recently synchronized the twin.
+
+\subsection{Digital twins and information freshness}
+
+Digital twins have been proposed as a means to support intelligent wireless systems, network automation, and data-driven control. Surveys on 6G and wireless digital twins discuss their role in modeling physical network behavior, supporting closed-loop control, and reducing the risk of deploying untested policies \cite{kuruvatti2022digital}. For UAV networks, digital-twin-enabled domain adaptation has been identified as a promising direction for zero-touch control, simulation-to-real transfer, and robust policy evaluation \cite{mcmanus2023digital}.
+
+The synchronization aspect of our problem is also related to age of information (AoI), which measures the freshness of status updates. Early AoI work showed that update frequency should be optimized rather than simply maximized, because network resources and queueing effects create tradeoffs \cite{kaul2012aoi}. Vehicular-network AoI studies reached similar conclusions for mobile systems \cite{kaul2011vehicular}. Our setting shares the same core idea that stale information is harmful, but the performance target is different: we optimize secrecy rate and secrecy outage under a limited synchronization budget, not only information freshness.
+
+\subsection{Optimization, reinforcement learning, and empirical certificates}
+
+Many UAV secrecy problems are nonconvex because channel gains, trajectory variables, and power decisions are coupled. Successive convex approximation and alternating optimization are therefore widely used, with convex optimization providing the standard mathematical foundation \cite{boyd2004convex}. In this paper, SCA-based baselines represent local optimization under either deployable twin information or oracle eavesdropper information.
+
+Reinforcement learning is another natural approach for sequential control. PPO \cite{schulman2017ppo} is a widely used policy-gradient method and is included as a lightweight learning-based baseline in our experiments. We do not claim that PPO is intrinsically unsuitable; our result only evaluates a limited-training baseline under the same simulator.
+
+Finally, our secrecy-loss certificate is related in spirit to distribution-free predictive inference and conformal prediction \cite{lei2018conformal,tibshirani2019covariate}. The certificate used here is not a full formal conformal guarantee under arbitrary deployment conditions. It is a holdout-fitted empirical upper bound that is calibrated and validated on simulated trajectory distributions. This conservative interpretation is important for avoiding overstatement of the certificate's scope.

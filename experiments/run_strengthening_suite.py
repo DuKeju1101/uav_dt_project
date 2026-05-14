@@ -135,7 +135,7 @@ def main() -> None:
         "outage_prob_mean",
         "outage_prob_ci95",
         "avg_sync_cost_mean",
-        "certificate_cover_rate_mean",
+        "certificate_in_policy_cover_rate_mean",
         "certificate_empirical_cover_rate_mean",
         "certificate_margin_cover_rate_mean",
         "runtime_per_slot_ms_mean",

@@ -80,7 +80,7 @@
 - `avg_sync_cost`
 - `avg_twin_quality`
 - `avg_cert_slack`
-- `certificate_cover_rate`
+- `certificate_in_policy_cover_rate`
 - `runtime_per_slot_ms`
 
 ### 3.2 策略层的方法
@@ -284,16 +284,19 @@
 
 这说明项目的主方法是成立的。
 
-#### B. `security_margin` 在高压力场景下有局部优势
+#### B. 高压力场景的 outage 门限已重新校准
 
-在 `scenario_stress` 中：
+早期 `scenario_stress` 使用 `r_min = 2.82`，该门限高于压力场景下代表性方法甚至 oracle 的可达时隙保密速率，导致所有方法的 `outage_prob` 都为 `1.0000`。因此旧版 stress 结果只能用于说明 secrecy-rate 提升，不能用于声称 outage 改善。
 
-- `security_margin` 的 outage 更优
-- `rollout_joint` 并没有在所有目标上绝对统治
+当前已将 `configs/scenario_stress.yaml` 的 `r_min` 校准为 `1.10`：
+
+- 保留更快 Eve、更少同步预算、更长 episode 带来的压力；
+- 避免不可达门限造成的 all-outage 退化；
+- 让 `outage_prob` 重新具备方法区分度。
 
 所以当前最合理的说法不是“主方法全方位碾压”，而是：
 
-`rollout_joint` 是整体最强、最有论文价值的方法，但在不同目标和不同场景上仍存在 tradeoff。`
+`rollout_joint` 是整体最强、最有论文价值的方法，但 stress 场景的 outage 结论需要基于校准门限重新跑表后再写入投稿版。`
 
 #### C. 证书覆盖率已经很强，但证书仍偏保守
 
