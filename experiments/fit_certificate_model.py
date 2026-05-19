@@ -45,7 +45,7 @@ def build_feature_frame(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     return out.replace([np.inf, -np.inf], np.nan).fillna(0.0)
 
 
-def fit_split_conformal_upper(
+def fit_holdout_empirical_upper(
     df: pd.DataFrame,
     ridge: float,
     alpha: float,
@@ -68,17 +68,18 @@ def fit_split_conformal_upper(
     x_calib = np.nan_to_num(calib[FEATURE_NAMES].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
     y_calib = np.nan_to_num(calib["realized_loss"].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
     calib_pred = np.maximum(x_calib @ beta, 0.0)
-    nonconformity = np.maximum(y_calib - calib_pred, 0.0)
-    q_level = min(1.0, np.ceil((len(nonconformity) + 1) * (1.0 - alpha)) / max(len(nonconformity), 1))
-    qhat = float(np.quantile(nonconformity, q_level, method="higher"))
+    calibration_residuals = np.maximum(y_calib - calib_pred, 0.0)
+    q_level = min(1.0, np.ceil((len(calibration_residuals) + 1) * (1.0 - alpha)) / max(len(calibration_residuals), 1))
+    qhat = float(np.quantile(calibration_residuals, q_level, method="higher"))
 
     model_dict = {
-        "model_type": "split_conformal_upper",
+        "model_type": "holdout_empirical_upper",
         "feature_names": FEATURE_NAMES,
         "coefficients": {name: float(val) for name, val in zip(FEATURE_NAMES, beta)},
         "intercept": 0.0,
         "alpha": float(alpha),
         "calibration_ratio": float(calibration_ratio),
+        "calibration_residual_quantile": qhat,
         "nonconformity_quantile": qhat,
         "safety_scale": 1.0,
     }
@@ -92,6 +93,10 @@ def fit_split_conformal_upper(
         }
     )
     return model_dict, split_df
+
+
+# Backward-compatible alias for older experiment commands.
+fit_split_conformal_upper = fit_holdout_empirical_upper
 
 
 def main() -> None:
@@ -144,7 +149,7 @@ def main() -> None:
 
     train_df = pd.concat(trace_frames, ignore_index=True)
     train_df.to_csv(outdir / "certificate_fit_traces.csv", index=False)
-    model_dict, split_df = fit_split_conformal_upper(
+    model_dict, split_df = fit_holdout_empirical_upper(
         train_df,
         ridge=float(args.ridge),
         alpha=float(args.alpha),

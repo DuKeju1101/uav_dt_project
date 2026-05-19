@@ -1,0 +1,181 @@
+\begin{thebibliography}{29}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Al-Hourani et~al.(2014)Al-Hourani, Kandeepan, and Lardner]{alhourani2014optimal}
+Akram Al-Hourani, Sithamparanathan Kandeepan, and Simon Lardner.
+\newblock Optimal lap altitude for maximum coverage.
+\newblock \emph{IEEE Wireless Communications Letters}, 3\penalty0 (6):\penalty0 569--572, 2014.
+\newblock \doi{10.1109/LWC.2014.2342736}.
+
+\bibitem[Boyd and Vandenberghe(2004)]{boyd2004convex}
+Stephen Boyd and Lieven Vandenberghe.
+\newblock \emph{Convex Optimization}.
+\newblock Cambridge University Press, 2004.
+\newblock \doi{10.1017/CBO9780511804441}.
+
+\bibitem[Chen et~al.(2025)Chen, Ding, Chen, Si, Lu, Lin, Yang, and Hu]{chen2025covertuavmec}
+Yangting Chen, Yu~Ding, Binyu Chen, Peiyuan Si, Weidang Lu, Di~Lin, Zhutian Yang, and Su~Hu.
+\newblock Covert communication towards a flying warden in uav-assisted mec system.
+\newblock \emph{Chinese Journal of Aeronautics}, 38\penalty0 (10):\penalty0 103568, 2025.
+\newblock \doi{10.1016/j.cja.2025.103568}.
+
+\bibitem[Csiszar and Korner(1978)]{csiszar1978broadcast}
+Imre Csiszar and Janos Korner.
+\newblock Broadcast channels with confidential messages.
+\newblock \emph{IEEE Transactions on Information Theory}, 24\penalty0 (3):\penalty0 339--348, 1978.
+\newblock \doi{10.1109/TIT.1978.1055892}.
+
+\bibitem[Ding et~al.(2024)Ding, Han, Lu, Wang, Zhao, Wang, and Yang]{ding2024ddqnuavmec}
+Yu~Ding, Huimei Han, Weidang Lu, Ye~Wang, Nan Zhao, Xianbin Wang, and Xiaoniu Yang.
+\newblock Ddqn-based trajectory and resource optimization for uav-aided mec secure communications.
+\newblock \emph{IEEE Transactions on Vehicular Technology}, 73\penalty0 (4):\penalty0 6006--6011, 2024.
+\newblock \doi{10.1109/TVT.2023.3335210}.
+
+\bibitem[Jiang et~al.(2024)Jiang, Han, Miao, and Gu]{jiang2024simulation}
+Weiwei Jiang, Haoyu Han, He~Miao, and Weixi Gu.
+\newblock Network simulation tools for unmanned aerial vehicle communications: A survey.
+\newblock \emph{International Journal of Communication Systems}, 37\penalty0 (15):\penalty0 e5878, 2024.
+\newblock \doi{10.1002/dac.5878}.
+
+\bibitem[Kaul et~al.(2011)Kaul, Gruteser, Rai, and Kenney]{kaul2011vehicular}
+Sanjit Kaul, Marco Gruteser, Vinuth Rai, and John Kenney.
+\newblock Minimizing age of information in vehicular networks.
+\newblock In \emph{2011 8th Annual IEEE Communications Society Conference on Sensor, Mesh and Ad Hoc Communications and Networks}, pages 350--358, 2011.
+\newblock \doi{10.1109/SAHCN.2011.5984917}.
+
+\bibitem[Kaul et~al.(2012)Kaul, Yates, and Gruteser]{kaul2012aoi}
+Sanjit Kaul, Roy Yates, and Marco Gruteser.
+\newblock Real-time status: How often should one update?
+\newblock In \emph{2012 Proceedings IEEE INFOCOM}, pages 2731--2735, 2012.
+\newblock \doi{10.1109/INFCOM.2012.6195689}.
+
+\bibitem[Kuruvatti et~al.(2022)Kuruvatti, Habibi, Partani, Han, Fellan, and Schotten]{kuruvatti2022digital}
+Nandish~P. Kuruvatti, Mohammad~Asif Habibi, Sanket Partani, Bin Han, Amina Fellan, and Hans~D. Schotten.
+\newblock Empowering 6g communication systems with digital twin technology: A comprehensive survey.
+\newblock \emph{IEEE Access}, 10:\penalty0 112158--112186, 2022.
+\newblock \doi{10.1109/ACCESS.2022.3215493}.
+
+\bibitem[Lakew et~al.(2020)Lakew, Sa'ad, Dao, Na, and Cho]{lakew2020fanet}
+Demeke~Shumeye Lakew, Umar Sa'ad, Nhu-Ngoc Dao, Woongsoo Na, and Sungrae Cho.
+\newblock Routing in flying ad hoc networks: A comprehensive survey.
+\newblock \emph{IEEE Communications Surveys \& Tutorials}, 22\penalty0 (2):\penalty0 1071--1120, 2020.
+\newblock \doi{10.1109/COMST.2020.2982452}.
+
+\bibitem[Li et~al.(2023)Li, Liu, Xie, Zhang, and Zhang]{li2023adaptivedt}
+Bin Li, Wenshuai Liu, Wancheng Xie, Ning Zhang, and Yan Zhang.
+\newblock Adaptive digital twin for uav-assisted integrated sensing, communication, and computation networks.
+\newblock \emph{IEEE Transactions on Green Communications and Networking}, 7\penalty0 (4):\penalty0 1996--2009, 2023.
+\newblock \doi{10.1109/TGCN.2023.3298039}.
+
+\bibitem[Liu et~al.(2024)Liu, Liu, Liu, Yu, Jia, Na, and Durrani]{liu2024secureisacuav}
+Yuemin Liu, Xin Liu, Zechen Liu, Yingfeng Yu, Min Jia, Zhenyu Na, and Tariq~S. Durrani.
+\newblock Secure rate maximization for isac-uav assisted communication amidst multiple eavesdroppers.
+\newblock \emph{IEEE Transactions on Vehicular Technology}, 73\penalty0 (10):\penalty0 15843--15847, 2024.
+\newblock \doi{10.1109/TVT.2024.3412805}.
+
+\bibitem[Lu et~al.(2024)Lu, Liu, Lu, Gao, Cao, Zhao, and Nallanathan]{lu2024securemaritimemec}
+Fangwei Lu, Gongliang Liu, Weidang Lu, Yuan Gao, Jiang Cao, Nan Zhao, and Arumugam Nallanathan.
+\newblock Resource and trajectory optimization for uav-relay-assisted secure maritime mec.
+\newblock \emph{IEEE Transactions on Communications}, 72\penalty0 (3):\penalty0 1641--1652, 2024.
+\newblock \doi{10.1109/TCOMM.2023.3330884}.
+
+\bibitem[Mao et~al.(2023)Mao, Xiong, Lu, Fan, and Ding]{mao2023secureuavmec}
+Weihao Mao, Ke~Xiong, Yang Lu, Pingyi Fan, and Zhiguo Ding.
+\newblock Energy consumption minimization in secure multi-antenna uav-assisted mec networks with channel uncertainty.
+\newblock \emph{IEEE Transactions on Wireless Communications}, 22\penalty0 (11):\penalty0 7185--7200, 2023.
+\newblock \doi{10.1109/TWC.2023.3248962}.
+
+\bibitem[McManus et~al.(2023)McManus, Cui, Zhang, Hu, Moorthy, Mastronarde, Bentley, Medley, and Guan]{mcmanus2023digital}
+Maxwell McManus, Yuqing Cui, Josh~Zhaoxi Zhang, Jiangqi Hu, Sabarish~Krishna Moorthy, Nicholas Mastronarde, Elizabeth~Serena Bentley, Michael Medley, and Zhangyu Guan.
+\newblock Digital twin-enabled domain adaptation for zero-touch uav networks: Survey and challenges.
+\newblock \emph{Computer Networks}, 236:\penalty0 110000, 2023.
+\newblock \doi{10.1016/j.comnet.2023.110000}.
+
+\bibitem[Mozaffari et~al.(2019)Mozaffari, Saad, Bennis, Nam, and Debbah]{mozaffari2019tutorial}
+Mohammad Mozaffari, Walid Saad, Mehdi Bennis, Yong-Hyun Nam, and Merouane Debbah.
+\newblock A tutorial on uavs for wireless networks: Applications, challenges, and open problems.
+\newblock \emph{IEEE Communications Surveys \& Tutorials}, 21\penalty0 (3):\penalty0 2334--2360, 2019.
+\newblock \doi{10.1109/COMST.2019.2902862}.
+
+\bibitem[Oubbati et~al.(2019)Oubbati, Mozaffari, Chaib, Lorenz, Atiquzzaman, and Jamalipour]{oubbati2019ecad}
+Omar~Sami Oubbati, Mohammad Mozaffari, Noureddine Chaib, Pascal Lorenz, Mohammed Atiquzzaman, and Abbas Jamalipour.
+\newblock Ecad: Energy-efficient routing in flying ad hoc networks.
+\newblock \emph{International Journal of Communication Systems}, 32\penalty0 (18):\penalty0 e4156, 2019.
+\newblock \doi{10.1002/dac.4156}.
+
+\bibitem[Schulman et~al.(2017)Schulman, Wolski, Dhariwal, Radford, and Klimov]{schulman2017ppo}
+John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov.
+\newblock Proximal policy optimization algorithms, 2017.
+\newblock URL \url{https://arxiv.org/abs/1707.06347}.
+
+\bibitem[Sun et~al.(2019)Sun, Duo, Wang, Lin, and Gao]{sun2019aerial}
+Hanming Sun, Bin Duo, Zhengqiang Wang, Xiaochen Lin, and Changchun Gao.
+\newblock Aerial cooperative jamming for cellular-enabled uav secure communication network: Joint trajectory and power control design.
+\newblock \emph{Sensors}, 19\penalty0 (20):\penalty0 4440, 2019.
+\newblock \doi{10.3390/s19204440}.
+
+\bibitem[Unnisa et~al.(2023)Unnisa, Tatineni, Fatima, and Pasha]{unnisa2023antijamming}
+Nazeer Unnisa, Madhavi Tatineni, Kaleem Fatima, and Mohammad~Mahaboob Pasha.
+\newblock Intelligent deep learning-aided future beam and proactive handoff prediction model in unmanned aerial vehicle-assisted anti-jamming terahertz communication system.
+\newblock \emph{International Journal of Communication Systems}, 36\penalty0 (13):\penalty0 e5504, 2023.
+\newblock \doi{10.1002/dac.5504}.
+
+\bibitem[Wang et~al.(2021)Wang, Chen, and Fu]{wang2021fault}
+Huibin Wang, Ming Chen, and Ping Fu.
+\newblock A distributed fault-tolerant mechanism for mission-oriented unmanned aerial vehicle swarms.
+\newblock \emph{International Journal of Communication Systems}, 34\penalty0 (8):\penalty0 e4789, 2021.
+\newblock \doi{10.1002/dac.4789}.
+
+\bibitem[Wei et~al.(2024)Wei, Liu, Liu, Yang, Ng, and Schober]{wei2024isncsecureuav}
+Zhiqiang Wei, Fan Liu, Chang Liu, Zai Yang, Derrick Wing~Kwan Ng, and Robert Schober.
+\newblock Integrated sensing, navigation, and communication for secure uav networks with a mobile eavesdropper.
+\newblock \emph{IEEE Transactions on Wireless Communications}, 23\penalty0 (7):\penalty0 7060--7078, 2024.
+\newblock \doi{10.1109/TWC.2023.3337148}.
+
+\bibitem[Wyner(1975)]{wyner1975wiretap}
+Aaron~D. Wyner.
+\newblock The wire-tap channel.
+\newblock \emph{Bell System Technical Journal}, 54\penalty0 (8):\penalty0 1355--1387, 1975.
+\newblock \doi{10.1002/j.1538-7305.1975.tb02040.x}.
+
+\bibitem[Yang et~al.(2024{\natexlab{a}})Yang, Chen, Liu, and Zhang]{yang2024jointdt}
+Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang Zhang.
+\newblock A joint communication and computation framework for digital twin over wireless networks.
+\newblock \emph{IEEE Journal of Selected Topics in Signal Processing}, 18\penalty0 (1):\penalty0 6--17, 2024{\natexlab{a}}.
+\newblock \doi{10.1109/JSTSP.2023.3347931}.
+
+\bibitem[Yang et~al.(2024{\natexlab{b}})Yang, Chen, Liu, and Zhang]{yang2024syncdelay}
+Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang Zhang.
+\newblock Optimizing synchronization delay for digital twin over wireless networks.
+\newblock In \emph{ICASSP 2024 - 2024 IEEE International Conference on Acoustics, Speech and Signal Processing}, pages 9106--9110, 2024{\natexlab{b}}.
+\newblock \doi{10.1109/ICASSP48485.2024.10446262}.
+
+\bibitem[Zeng et~al.(2016)Zeng, Zhang, and Lim]{zeng2016uav}
+Yong Zeng, Rui Zhang, and Teng~Joon Lim.
+\newblock Wireless communications with unmanned aerial vehicles: Opportunities and challenges.
+\newblock \emph{IEEE Communications Magazine}, 54\penalty0 (5):\penalty0 36--42, 2016.
+\newblock \doi{10.1109/MCOM.2016.7470933}.
+
+\bibitem[Zhang et~al.(2019)Zhang, Wu, Cui, and Zhang]{zhang2019securing}
+Guangchi Zhang, Qingqing Wu, Miao Cui, and Rui Zhang.
+\newblock Securing uav communications via joint trajectory and power control.
+\newblock \emph{IEEE Transactions on Wireless Communications}, 18\penalty0 (2):\penalty0 1376--1389, 2019.
+\newblock \doi{10.1109/TWC.2019.2892461}.
+
+\bibitem[Zhong et~al.(2019)Zhong, Yao, and Xu]{zhong2019cooperative}
+Canhui Zhong, Jianping Yao, and Jie Xu.
+\newblock Secure uav communication with cooperative jamming and trajectory control.
+\newblock \emph{IEEE Communications Letters}, 23\penalty0 (2):\penalty0 286--289, 2019.
+\newblock \doi{10.1109/LCOMM.2018.2889062}.
+
+\bibitem[Zhou et~al.(2018)Zhou, Yeoh, Chen, Li, Schober, Zhuo, and Vucetic]{zhou2018unknown}
+Yi~Zhou, Phee~Lep Yeoh, He~Chen, Yonghui Li, Robert Schober, Li~Zhuo, and Branka Vucetic.
+\newblock Improving physical layer security via a uav friendly jammer for unknown eavesdropper location.
+\newblock \emph{IEEE Transactions on Vehicular Technology}, 67\penalty0 (11):\penalty0 11280--11284, 2018.
+\newblock \doi{10.1109/TVT.2018.2868944}.
+
+\end{thebibliography}

@@ -159,7 +159,7 @@ def secrecy_loss_upper_bound(aoi: int, pred_error_radius: float, sigma: float, k
     return float(k1 * pred_error_radius + k2 * sigma + k3 * aoi)
 
 
-def build_conformal_features(
+def build_risk_estimator_features(
     aoi: int,
     pred_error_radius: float,
     sigma: float,
@@ -186,7 +186,7 @@ def build_conformal_features(
     return feats
 
 
-def conformal_secrecy_loss_upper_bound(
+def empirical_secrecy_loss_upper_bound(
     aoi: int,
     pred_error_radius: float,
     sigma: float,
@@ -195,7 +195,7 @@ def conformal_secrecy_loss_upper_bound(
     model: dict[str, Any],
     feature_scales: dict[str, float],
 ) -> dict[str, float]:
-    feats = build_conformal_features(
+    feats = build_risk_estimator_features(
         aoi=aoi,
         pred_error_radius=pred_error_radius,
         sigma=sigma,
@@ -210,14 +210,19 @@ def conformal_secrecy_loss_upper_bound(
         pred += coefficients.get(name, 0.0) * feats.get(name, 0.0)
 
     predicted_loss = max(pred, 0.0)
-    conformal_buffer = float(model.get("nonconformity_quantile", model.get("residual_quantile", 0.0)))
+    calibration_buffer = float(model.get("nonconformity_quantile", model.get("residual_quantile", 0.0)))
     safety_scale = float(model.get("safety_scale", 1.0))
-    upper_bound = predicted_loss + safety_scale * conformal_buffer
+    upper_bound = predicted_loss + safety_scale * calibration_buffer
     return {
         "predicted_loss": float(predicted_loss),
-        "conformal_buffer": float(safety_scale * conformal_buffer),
+        "calibration_buffer": float(safety_scale * calibration_buffer),
         "upper_bound": float(upper_bound),
     }
+
+
+# Backward-compatible aliases for older experiment scripts/config notebooks.
+build_conformal_features = build_risk_estimator_features
+conformal_secrecy_loss_upper_bound = empirical_secrecy_loss_upper_bound
 
 
 def robust_secrecy_certificate(
@@ -238,7 +243,7 @@ def robust_secrecy_certificate(
     empirical_bound = 0.0
     empirical_buffer = 0.0
     if isinstance(theory, dict) and "loss_model" in theory:
-        loss_model = conformal_secrecy_loss_upper_bound(
+        loss_model = empirical_secrecy_loss_upper_bound(
             aoi=aoi,
             pred_error_radius=pred_error_radius,
             sigma=sigma,
@@ -249,7 +254,7 @@ def robust_secrecy_certificate(
         )
         base_bound = float(loss_model["predicted_loss"])
         empirical_bound = float(loss_model["upper_bound"])
-        empirical_buffer = float(loss_model["conformal_buffer"])
+        empirical_buffer = float(loss_model["calibration_buffer"])
         required_margin = rho + empirical_bound
     else:
         base_bound = secrecy_loss_upper_bound(

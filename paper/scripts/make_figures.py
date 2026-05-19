@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -6,7 +7,8 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[2]
-RESULTS = ROOT / "results" / "final_2026-05-12"
+DEFAULT_RESULTS_DIR = "results/final_2026-05-12"
+RESULTS = ROOT / DEFAULT_RESULTS_DIR
 FIGURES = ROOT / "paper" / "figures"
 FIGURES.mkdir(parents=True, exist_ok=True)
 
@@ -60,6 +62,28 @@ def savefig(name: str) -> None:
     plt.tight_layout()
     plt.savefig(FIGURES / name, bbox_inches="tight")
     plt.close()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate paper figures from experiment outputs.")
+    parser.add_argument(
+        "--results-dir",
+        default=DEFAULT_RESULTS_DIR,
+        help="Directory containing experiment outputs. Relative paths are resolved from the project root.",
+    )
+    return parser.parse_args()
+
+
+def set_results_dir(results_dir: str) -> None:
+    global RESULTS
+
+    path = Path(results_dir)
+    if not path.is_absolute():
+        path = ROOT / path
+    RESULTS = path
+
+    if not RESULTS.is_dir():
+        raise FileNotFoundError(f"results directory does not exist: {RESULTS}")
 
 
 def plot_main_results() -> None:
@@ -142,7 +166,7 @@ def plot_stress_strengthening() -> None:
     savefig("stress_strengthening_suite.pdf")
 
 
-def plot_certificate_validation() -> None:
+def plot_risk_estimator_validation() -> None:
     df = pd.read_csv(RESULTS / "scheme_c_holdout" / "holdout_summary.csv")
     part = df[df["split"].eq("validation")].copy()
     order = ["paper_base", "paper_hard", "scenario_stress", "all"]
@@ -151,10 +175,10 @@ def plot_certificate_validation() -> None:
     x = np.arange(len(part))
 
     fig, ax1 = plt.subplots(figsize=(5.0, 2.8))
-    ax1.bar(x - 0.18, part["cover_rate"], 0.36, color="#0072B2", edgecolor="black", linewidth=0.3, label="Cover rate")
-    ax1.axhline(0.95, color="#D55E00", linestyle="--", linewidth=1.0, label="Target 0.95")
+    ax1.bar(x - 0.18, part["cover_rate"], 0.36, color="#0072B2", edgecolor="black", linewidth=0.3, label="Empirical cover")
+    ax1.axhline(0.95, color="#D55E00", linestyle="--", linewidth=1.0, label="Diagnostic 0.95")
     ax1.set_ylim(0.90, 1.01)
-    ax1.set_ylabel("Certificate cover rate")
+    ax1.set_ylabel("Empirical cover rate")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
     ax1.grid(axis="y", alpha=0.25)
@@ -165,7 +189,7 @@ def plot_certificate_validation() -> None:
     handles1, labels1 = ax1.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(handles1 + handles2, labels1 + labels2, frameon=False, loc="lower center", bbox_to_anchor=(0.5, 1.02), ncol=3)
-    savefig("certificate_validation.pdf")
+    savefig("risk_estimator_validation.pdf")
 
 
 def plot_ppo_training() -> None:
@@ -204,6 +228,34 @@ def plot_small_mdp_trace() -> None:
     savefig("small_mdp_trace.pdf")
 
 
+def plot_rmin_sweep() -> None:
+    path = RESULTS / "rmin_sweep_stress" / "gains_vs_periodic.csv"
+    if not path.exists():
+        print(f"Skipping R_min sweep figure; missing {path}")
+        return
+
+    df = pd.read_csv(path)
+    methods = ["rollout_joint", "security_risk", "security_margin"]
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8), sharex=True)
+    for method in methods:
+        part = df[df["method"].eq(method)].sort_values("r_min")
+        if part.empty:
+            continue
+        label = method_label(method)
+        color = COLORS.get(method, "#666666")
+        axes[0].plot(part["r_min"], part["secrecy_gain_vs_periodic"], marker="o", linewidth=1.5, label=label, color=color)
+        axes[1].plot(part["r_min"], part["outage_gain_vs_periodic"], marker="o", linewidth=1.5, label=label, color=color)
+
+    for ax in axes:
+        ax.axhline(0.0, color="black", linestyle="--", linewidth=0.8)
+        ax.set_xlabel(r"$R_{\min}$")
+        ax.grid(alpha=0.25)
+    axes[0].set_ylabel("Secrecy-rate gain vs periodic")
+    axes[1].set_ylabel("Outage reduction vs periodic")
+    axes[0].legend(frameon=False, loc="best")
+    savefig("rmin_sweep_stress.pdf")
+
+
 def plot_framework() -> None:
     fig, ax = plt.subplots(figsize=(7.0, 3.2))
     ax.axis("off")
@@ -211,7 +263,7 @@ def plot_framework() -> None:
     boxes = {
         "Physical UAV system": (0.04, 0.58, 0.22, 0.22),
         "Digital twin state": (0.39, 0.58, 0.22, 0.22),
-        "Certificate risk estimator": (0.39, 0.18, 0.22, 0.22),
+        "Empirical risk estimator": (0.39, 0.18, 0.22, 0.22),
         "Joint rollout controller": (0.73, 0.38, 0.23, 0.24),
         "Actions: sync, motion, power, jamming": (0.04, 0.18, 0.25, 0.22),
     }
@@ -238,9 +290,12 @@ def plot_framework() -> None:
 
 
 if __name__ == "__main__":
+    args = parse_args()
+    set_results_dir(args.results_dir)
     plot_framework()
     plot_main_results()
-    plot_certificate_validation()
+    plot_risk_estimator_validation()
     plot_stress_strengthening()
     plot_ppo_training()
     plot_small_mdp_trace()
+    plot_rmin_sweep()

@@ -9,7 +9,7 @@ import pandas as pd
 import yaml
 
 from experiments.common import ROOT, load_config, run_single_episode
-from experiments.fit_certificate_model import FEATURE_NAMES, build_feature_frame, fit_split_conformal_upper
+from experiments.fit_certificate_model import FEATURE_NAMES, build_feature_frame, fit_holdout_empirical_upper
 
 
 def _scenario_names(config_paths: list[str]) -> set[str]:
@@ -28,6 +28,8 @@ def _seed_values(config_paths: list[str], seed_start: int, num_seeds: int) -> se
 def _validate_holdout_inputs(
     train_configs: list[str],
     eval_configs: list[str],
+    train_methods: list[str],
+    eval_methods: list[str],
     train_seed_start: int,
     train_seeds: int,
     eval_seed_start: int,
@@ -48,6 +50,17 @@ def _validate_holdout_inputs(
     if seed_overlap:
         overlap = ", ".join(str(seed) for seed in sorted(seed_overlap))
         raise ValueError(f"Holdout train/eval seeds overlap: {overlap}")
+
+    train_method_set = set(train_methods)
+    eval_method_set = set(eval_methods)
+    if train_method_set != eval_method_set:
+        train_only = ", ".join(sorted(train_method_set - eval_method_set)) or "none"
+        eval_only = ", ".join(sorted(eval_method_set - train_method_set)) or "none"
+        raise ValueError(
+            "Holdout train/eval method sets differ. "
+            f"train-only: {train_only}; eval-only: {eval_only}. "
+            "Use the same method set to avoid method-distribution shift in certificate validation."
+        )
 
 
 def _collect_traces(config_paths: list[str], methods: list[str], num_seeds: int, seed_start: int = 0) -> tuple[pd.DataFrame, dict[str, dict[str, float]]]:
@@ -71,7 +84,7 @@ def _collect_traces(config_paths: list[str], methods: list[str], num_seeds: int,
                 feats["method"] = method
                 feats["seed"] = seed
                 frames.append(feats)
-                print(f"[done] split-data scenario={scenario} method={method} seed={seed}")
+                print(f"[done] holdout-data scenario={scenario} method={method} seed={seed}")
     return pd.concat(frames, ignore_index=True), feature_scales
 
 
@@ -131,12 +144,12 @@ def _split_eval_calibration(df: pd.DataFrame, calibration_ratio: float) -> tuple
     return shuffled.iloc[:calib_size].copy(), shuffled.iloc[calib_size:].copy()
 
 
-def _conformal_quantile(nonconformity: np.ndarray, alpha: float) -> float:
+def _calibration_quantile(calibration_residuals: np.ndarray, alpha: float) -> float:
     q_level = min(
         1.0,
-        np.ceil((len(nonconformity) + 1) * (1.0 - float(alpha))) / max(len(nonconformity), 1),
+        np.ceil((len(calibration_residuals) + 1) * (1.0 - float(alpha))) / max(len(calibration_residuals), 1),
     )
-    return float(np.quantile(nonconformity, q_level, method="higher"))
+    return float(np.quantile(calibration_residuals, q_level, method="higher"))
 
 
 def _calibrate_model_buffer(model: dict, df: pd.DataFrame, alpha: float, by_scenario: bool) -> dict:
@@ -147,7 +160,7 @@ def _calibrate_model_buffer(model: dict, df: pd.DataFrame, alpha: float, by_scen
     beta = np.array([float(model["coefficients"][name]) for name in FEATURE_NAMES], dtype=float)
     pred = np.maximum(x @ beta + float(model.get("intercept", 0.0)), 0.0)
     loss = df["realized_loss"].to_numpy(dtype=float)
-    nonconformity = np.maximum(loss - pred, 0.0)
+    calibration_residuals = np.maximum(loss - pred, 0.0)
 
     scenario_qhats: dict[str, float] = {}
     if by_scenario:
@@ -155,16 +168,19 @@ def _calibrate_model_buffer(model: dict, df: pd.DataFrame, alpha: float, by_scen
         scenario_alpha = float(alpha) / max(len(scenario_names), 1)
         for scenario in scenario_names:
             mask = df["scenario"].astype(str).to_numpy() == scenario
-            scenario_qhats[scenario] = _conformal_quantile(nonconformity[mask], scenario_alpha)
+            scenario_qhats[scenario] = _calibration_quantile(calibration_residuals[mask], scenario_alpha)
         extra_qhat = max(scenario_qhats.values()) if scenario_qhats else 0.0
     else:
-        extra_qhat = _conformal_quantile(nonconformity, alpha)
+        extra_qhat = _calibration_quantile(calibration_residuals, alpha)
 
     current_qhat = float(model.get("nonconformity_quantile", model.get("residual_quantile", 0.0)))
     model["nonconformity_quantile"] = max(current_qhat, extra_qhat)
+    model["calibration_residual_quantile"] = max(current_qhat, extra_qhat)
+    model["posthoc_calibration_residual_quantile"] = extra_qhat
     model["posthoc_nonconformity_quantile"] = extra_qhat
+    model["posthoc_scenario_calibration_quantiles"] = scenario_qhats
     model["posthoc_scenario_nonconformity_quantiles"] = scenario_qhats
-    model["posthoc_calibration_size"] = int(len(nonconformity))
+    model["posthoc_calibration_size"] = int(len(calibration_residuals))
     return model
 
 
@@ -215,6 +231,8 @@ def main() -> None:
     _validate_holdout_inputs(
         train_configs=list(args.train_configs),
         eval_configs=list(args.eval_configs),
+        train_methods=list(args.train_methods),
+        eval_methods=list(args.eval_methods),
         train_seed_start=int(args.train_seed_start),
         train_seeds=int(args.train_seeds),
         eval_seed_start=int(args.eval_seed_start),
@@ -232,7 +250,7 @@ def main() -> None:
     train_df.to_csv(outdir / "holdout_train_traces.csv", index=False)
     eval_df.to_csv(outdir / "holdout_eval_traces.csv", index=False)
 
-    model, split_df = fit_split_conformal_upper(
+    model, split_df = fit_holdout_empirical_upper(
         df=train_df,
         ridge=float(args.ridge),
         alpha=float(args.alpha),

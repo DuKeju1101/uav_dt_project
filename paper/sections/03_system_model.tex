@@ -66,11 +66,11 @@ We evaluate policies using five metrics:
     \end{equation}
     where lower is better;
     \item average synchronization cost, which measures synchronization-budget consumption;
-    \item certificate cover rate, which measures whether the fitted secrecy-loss upper bound covers realized loss;
+    \item empirical upper-bound cover rate, which measures whether the fitted secrecy-loss upper bound covers realized loss on the evaluated holdout traces;
     \item runtime per slot, which measures decision-time cost.
 \end{itemize}
 
-The final calibrated stress scenario uses $R_{\min}=1.10$. This value was chosen after calibration because the earlier threshold made every evaluated method remain in outage, which removed the ability to compare methods by outage probability. The base and hard scenarios retain their configured thresholds and remain useful for testing whether the controller is competitive under different operating regimes.
+The final calibrated stress scenario uses $R_{\min}=1.10$ as its main operating point. This value was chosen after calibration because the earlier threshold made every evaluated method remain in outage, which removed the ability to compare methods by outage probability. Since outage conclusions can depend on this threshold, claims about outage reduction in the stress scenario should be interpreted at the calibrated operating point unless they are accompanied by an explicit $R_{\min}$ sensitivity sweep. The base and hard scenarios retain their configured thresholds and remain useful for testing whether the controller is competitive under different operating regimes.
 
 \subsection{Twin-induced secrecy loss}
 
@@ -78,4 +78,4 @@ Let $\widehat{R}_s(t)$ be the secrecy value predicted from the twin state and $R
 \begin{equation}
     L(t)=\left[\widehat{R}_s(t)-R_s(t)\right]^+.
 \end{equation}
-The controller uses a fitted upper bound $\widehat{L}_{\mathrm{ub}}(t)$ constructed from twin age, predicted error radius, uncertainty scale, synchronization delay, and failure probability. A candidate action is considered safer when its predicted secrecy margin exceeds the required threshold plus this empirical upper bound. This produces a certificate slack term used by the proposed controller.
+The controller uses a fitted upper bound $\widehat{L}_{\mathrm{ub}}(t)$ constructed from twin age, predicted error radius, uncertainty scale, synchronization delay, and failure probability. A candidate action is considered safer when its predicted secrecy margin exceeds the required threshold plus this empirical upper bound. This produces a risk-estimator slack term used by the proposed controller.
