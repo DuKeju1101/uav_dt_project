@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  19 MAY 2026 14:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  19 MAY 2026 17:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1441,6 +1441,7 @@ Underfull \hbox (badness 1132) in paragraph at lines 21--22
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
+LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 28.
 ) (./sections/02_related_work.tex
 Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
@@ -1448,7 +1449,7 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 
 [2
 
-]
+{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc}]
 Underfull \hbox (badness 1442) in paragraph at lines 17--18
 []\T1/stix2/m/n/9.03374 These works mo-ti-vate our use of tra-jec-tory, trans-mit power,
  []
@@ -1462,23 +1463,27 @@ Underfull \hbox (badness 1331) in paragraph at lines 24--25
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
 [3 <./figures/dt_uav_joint_sync_secure_control_loop.pdf>]) (./sections/03_system_model.tex
-LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 6.
-
 Underfull \hbox (badness 4096) in paragraph at lines 12--13
 \T1/stix2/m/n/9.03374 For a hor-i-zon-tal transmitter-receiver pair $\LS1/stix2/m/n/9.03374 .\LS1/stix2/b/n/9.03374 x\LS1/stix2/m/it/9.03374 ; \LS1/stix2/b/n/9.03374 y\LS1/stix2/m/n/9.03374 /$\T1/stix2/m/n/9.03374 , the three-
  []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
-[4{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathcal.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm-bold.enc}]
+[4{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathcal.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm-bold.enc}]
 Underfull \hbox (badness 10000) in paragraph at lines 68--69
  []\T1/stix2/m/n/9.03374 average syn-chro-niza-tion cost, which mea-sures
  []
@@ -1518,6 +1523,12 @@ Underfull \hbox (badness 1019) in paragraph at lines 26--28
 \T1/stix2/m/n/9.03374 the claim made here is de-lib-er-ately nar-rower than a for-mal
  []
 
+
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[5{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathbb.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathsf.enc}]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 57.
 
 Underfull \hbox (badness 10000) in paragraph at lines 60--61
@@ -1557,11 +1568,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 69--70
  []
 
 
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[5{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathbb.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathsf.enc}]
 Underfull \hbox (badness 1377) in paragraph at lines 77--78
 \T1/stix2/m/n/9.03374 in-ex-pen-sive. \T1/cmtt/m/n/9 security_risk \T1/stix2/m/n/9.03374 trig-gers syn-chro-niza-tion with a
  []
@@ -1597,9 +1603,6 @@ Underfull \hbox (badness 1137) in paragraph at lines 81--82
  []
 
 ) (./sections/05_experiments.tex
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 6--7
 \T1/stix2/m/n/9.03374 All nu-mer-i-cal re-sults re-ported in this section are gen-
  []
@@ -1635,11 +1638,16 @@ Underfull \hbox (badness 1859) in paragraph at lines 12--13
  []
 
 
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[6]
 Underfull \hbox (badness 10000) detected at line 22
 []
  []
 
-<figures/main_results_secrecy_outage.pdf, id=191, 505.2545pt x 192.30846pt>
+<figures/main_results_secrecy_outage.pdf, id=200, 505.2545pt x 192.30846pt>
 File: figures/main_results_secrecy_outage.pdf Graphic file (type pdf)
 <use figures/main_results_secrecy_outage.pdf>
 Package pdftex.def Info: figures/main_results_secrecy_outage.pdf  used on input line 51.
@@ -1655,11 +1663,6 @@ Underfull \hbox (badness 1152) in paragraph at lines 56--57
  []
 
 
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[6]
 Underfull \hbox (badness 1552) in paragraph at lines 60--61
 \T1/stix2/m/n/9.03374 Because the stress out-age thresh-old was cal-i-brated to avoid
  []
@@ -1669,17 +1672,12 @@ Underfull \hbox (badness 7595) in paragraph at lines 60--61
 \T1/stix2/m/n/9.03374 a de-gen-er-ate all-outage regime, we also sweep $\LS1/stix2/m/it/9.03374 R[] \LS1/stix2/m/n/9.03374 Ë
  []
 
-
-Underfull \hbox (badness 2285) in paragraph at lines 60--61
-\T1/stix2/m/n/9.03374 con-fig-u-ra-tion, meth-ods, and 20 seeds. Figure [][]3[][] re-ports the
- []
-
-<figures/rmin_sweep_stress.pdf, id=205, 500.0946pt x 195.97015pt>
+<figures/rmin_sweep_stress.pdf, id=202, 500.0946pt x 195.97015pt>
 File: figures/rmin_sweep_stress.pdf Graphic file (type pdf)
 <use figures/rmin_sweep_stress.pdf>
 Package pdftex.def Info: figures/rmin_sweep_stress.pdf  used on input line 64.
 (pdftex.def)             Requested size: 445.68645pt x 174.65808pt.
-<figures/risk_estimator_validation.pdf, id=208, 354.98372pt x 198.2411pt>
+<figures/risk_estimator_validation.pdf, id=205, 354.98372pt x 198.2411pt>
 File: figures/risk_estimator_validation.pdf Graphic file (type pdf)
 <use figures/risk_estimator_validation.pdf>
 Package pdftex.def Info: figures/risk_estimator_validation.pdf  used on input line 91.
@@ -1690,11 +1688,6 @@ Underfull \hbox (badness 1147) in paragraph at lines 96--97
  []
 
 
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[7 <./figures/main_results_secrecy_outage.pdf>]
 Underfull \hbox (badness 10000) detected at line 104
 []
  []
@@ -1704,7 +1697,7 @@ Underfull \hbox (badness 1237) in paragraph at lines 118--119
 []\T1/stix2/m/n/9.03374 We sep-a-rately re-port a lightweight PPO di-ag-nos-tic run. The
  []
 
-<figures/ppo_training_curve.pdf, id=230, 370.05565pt x 189.97852pt>
+<figures/ppo_training_curve.pdf, id=208, 370.05565pt x 189.97852pt>
 File: figures/ppo_training_curve.pdf Graphic file (type pdf)
 <use figures/ppo_training_curve.pdf>
 Package pdftex.def Info: figures/ppo_training_curve.pdf  used on input line 122.
@@ -1729,18 +1722,12 @@ Underfull \hbox (badness 10000) detected at line 133
 []
  []
 
-
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[8 <./figures/rmin_sweep_stress.pdf> <./figures/risk_estimator_validation.pdf> <./figures/ppo_training_curve.pdf>]
-<figures/stress_strengthening_suite.pdf, id=281, 514.89238pt x 226.42969pt>
+<figures/stress_strengthening_suite.pdf, id=211, 514.89238pt x 226.42969pt>
 File: figures/stress_strengthening_suite.pdf Graphic file (type pdf)
 <use figures/stress_strengthening_suite.pdf>
 Package pdftex.def Info: figures/stress_strengthening_suite.pdf  used on input line 153.
 (pdftex.def)             Requested size: 486.2041pt x 213.81824pt.
-<figures/small_mdp_trace.pdf, id=283, 471.29701pt x 197.3851pt>
+<figures/small_mdp_trace.pdf, id=213, 471.29701pt x 197.3851pt>
 File: figures/small_mdp_trace.pdf Graphic file (type pdf)
 <use figures/small_mdp_trace.pdf>
 Package pdftex.def Info: figures/small_mdp_trace.pdf  used on input line 164.
@@ -1756,6 +1743,11 @@ Underfull \hbox (badness 1132) in paragraph at lines 171--1
  []
 
 
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[7]
 Underfull \hbox (badness 2591) in paragraph at lines 12--13
 \T1/stix2/m/n/9.03374 The oracle-state roll-out es-tab-lishes that bet-ter eaves-drop-per
  []
@@ -1780,27 +1772,7 @@ Underfull \hbox (badness 4713) in paragraph at lines 12--13
 \T1/stix2/m/n/9.03374 syn-chro-niza-tion re-li-a-bil-ity, and con-trol ap-prox-i-ma-tion. The
  []
 
-) (./sections/07_conclusion.tex
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
 
-[9]
-Underfull \hbox (badness 1331) in paragraph at lines 6--7
-[]\T1/stix2/m/n/9.03374 The fi-nal re-sults sup-port the value of joint synchronization-
- []
-
-
-Underfull \hbox (badness 1107) in paragraph at lines 6--7
-\T1/stix2/m/n/9.03374 control de-sign. In the cal-i-brated 20-seed stress sce-nario, the
- []
-
-
-Underfull \hbox (badness 1442) in paragraph at lines 6--7
-\T1/stix2/m/n/9.03374 pro-posed con-troller im-proves av-er-age se-crecy rate over pe-ri-
- []
-
-)
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
@@ -1808,7 +1780,28 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
+[8 <./figures/main_results_secrecy_outage.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[9 <./figures/rmin_sweep_stress.pdf> <./figures/risk_estimator_validation.pdf> <./figures/ppo_training_curve.pdf>]) (./sections/07_conclusion.tex
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
 [10 <./figures/stress_strengthening_suite.pdf> <./figures/small_mdp_trace.pdf>]
+Underfull \hbox (badness 1331) in paragraph at lines 6--7
+[]\T1/stix2/m/n/9.03374 The fi-nal re-sults sup-port the value of joint synchronization-
+ []
+
+)
 Underfull \hbox (badness 2809) in paragraph at lines 75--76
 \T1/stix2/m/n/9.03374 in this manuscript are de-rived from the re-sult files un-der
  []
@@ -1826,6 +1819,14 @@ Underfull \hbox (badness 8000) in paragraph at lines 105--109
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[11]
 Underfull \hbox (badness 1371) in paragraph at lines 116--120
 \T1/stix2/m/n/8.5 Changchun Gao.  Aerial co-op-er-a-tive jam-ming for cellular-
  []
@@ -1836,14 +1837,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 134--138
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[11]
 Underfull \hbox (badness 1681) in paragraph at lines 146--150
 []\T1/stix2/m/n/8.5 Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang
  []
@@ -1869,13 +1862,13 @@ L3 programming layer <2026-04-28>
 Here is how much of TeX's memory you used:
  36529 strings out of 469288
  663267 string characters out of 5465295
- 1068682 words of memory out of 5000000
+ 1075682 words of memory out of 5000000
  64611 multiletter control sequences out of 15000+600000
  857594 words of font info for 262 fonts, out of 8000000 for 9000
  62 hyphenation exceptions out of 8191
  113i,10n,122p,2319b,703s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Math.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Bold.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb>
-Output written on main.pdf (12 pages, 1017858 bytes).
+Output written on main.pdf (12 pages, 1018204 bytes).
 PDF statistics:
  599 PDF objects out of 1000 (max. 8388607)
  434 compressed objects within 5 object streams

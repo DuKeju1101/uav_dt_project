@@ -1,6 +1,6 @@
 # R_min Sweep Protocol
 
-The calibrated stress scenario uses `channel.r_min = 1.10` because the earlier stress threshold made all evaluated methods remain in outage. This is a valid calibrated operating point, but it is not enough by itself to support a threshold-robust outage claim.
+The calibrated stress scenario uses `channel.r_min = 1.10` as a feasible but non-trivial service point selected from a pilot feasibility sweep. The earlier stress threshold made all evaluated methods remain in outage, so it was not informative for outage comparison. The `1.10` value should not be described as tuned to the proposed method; it is the main operating point, and the sweep below is the evidence that prevents the outage claim from resting on a single threshold.
 
 Run the stress-threshold sweep before making broad claims about outage robustness:
 
@@ -30,7 +30,8 @@ python3 paper/scripts/make_figures.py
 
 Interpretation rule:
 
-- If `rollout_joint` remains above `periodic` across several `R_min` values, the stress conclusion can be described as robust to the outage threshold over that range.
-- If the gain appears only near `R_min = 1.10`, keep the paper narrative narrower: the method is effective at the calibrated stress operating point, but outage gains are threshold-sensitive.
+- If `rollout_joint` remains above `periodic` across several `R_min` values, describe the supported threshold range explicitly.
+- If the outage gain appears only near `R_min = 1.10`, keep the paper narrative narrower: the method is effective at the calibrated stress operating point, but outage gains are threshold-sensitive.
+- Do not justify `R_min = 1.10` by referencing the proposed method's median or best-case performance. Use the neutral pilot-feasibility language instead.
 
 This sweep must rerun the controllers rather than recomputing outage from existing summaries, because `R_min` affects the rollout score, certificate slack, and synchronization decisions.

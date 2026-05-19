@@ -45,9 +45,9 @@
 
 这支持把 certificate 写成当前策略分布下经过验证的保守风险估计模块。
 
-### 贡献 4：多 seed 实验证明 stress 场景下同时提升 secrecy-rate 并降低 outage
+### 贡献 4：多 seed 实验证明非饱和 stress 阈值下同时提升 secrecy-rate 并降低 outage
 
-在 20-seed 主实验中，`rollout_joint` 在三个主场景中都提高平均安全通信速率，并且在校准后的 stress 场景中明显降低 outage。
+在 20-seed 主实验中，`rollout_joint` 在三个主场景中都提高平均安全通信速率。outage 方面，最明确的改善出现在校准后的 stress 场景：在非饱和阈值 `R_min = 1.10` 下，`rollout_joint` 明显降低 outage。
 
 | 场景 | rollout_joint secrecy | periodic secrecy | secrecy 增益 | rollout_joint outage | periodic outage | outage 改善 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -55,7 +55,7 @@
 | `paper_hard_holdoutfit` | 1.4429 | 1.2803 | +0.1626 | 0.9482 | 0.9496 | +0.0014 |
 | `scenario_stress_holdoutfit` | 1.2540 | 0.9858 | +0.2683 | 0.4294 | 0.6434 | +0.2141 |
 
-其中 `scenario_stress_holdoutfit` 是最强结果：主方法同时提升 secrecy-rate 和降低 outage。
+其中 `scenario_stress_holdoutfit` 是最强结果：主方法在校准的非饱和阈值下同时提升 secrecy-rate 和降低 outage。需要注意，后续 `R_min` sweep 显示 outage 改善主要集中在 `R_min <= 1.10` 的非饱和区间；当 `R_min >= 1.40` 后，各方法 outage 已接近饱和，主方法的 outage 优势基本消失。因此论文中的 outage 改善 claim 应限定在校准阈值及类似的非饱和 QoS 区间，而不是泛化为所有 outage target。
 
 ## 3. 统一口径补跑后的最终实验结果
 
@@ -126,7 +126,7 @@
 
 第二，方法有明确创新点。`rollout_joint` 把同步、轨迹、功率、干扰和 certificate-aware 风险控制放在一个前瞻式联合决策框架中。
 
-第三，实验结果支持主 claim。20-seed 主表中，`rollout_joint` 在三个场景都提高 secrecy-rate；stress 场景同时降低 outage。
+第三，实验结果支持主 claim。20-seed 主表中，`rollout_joint` 在三个场景都提高 secrecy-rate；校准后的 stress 场景在 `R_min = 1.10` 下同时降低 outage。这个 outage 结论需要和 `R_min` sweep 一起表述：outage 改善集中在非饱和阈值区间，不能写成对所有阈值都成立。
 
 第四，baseline 和消融已经比较完整。现在已有 `periodic`、`security_risk`、`security_margin`、PPO、SCA、`no_twin`、`rollout_no_sync`、`rollout_fixed_periodic`、`oracle_sync` 和 small MDP sanity check。
 
@@ -157,6 +157,14 @@ PPO 结果可以作为 lightweight DRL baseline，但不能用来否定所有 DR
 推荐写法：
 
 > The PPO baseline is evaluated under a lightweight training budget. Stronger DRL baselines with larger training budgets and tuned architectures are left for future work.
+
+### 5.4 outage 改善依赖非饱和阈值区间
+
+`R_min` sweep 显示，stress 场景下 secrecy-rate 增益比较稳定，但 outage 改善并不覆盖所有阈值。当 `R_min` 从 `0.60`、`0.90` 到 `1.10` 时，`rollout_joint` 相比 `periodic` 的 outage 改善分别约为 `+0.285`、`+0.336` 和 `+0.214`；当 `R_min >= 1.40` 后，outage 已接近饱和，改善基本消失。
+
+推荐写法：
+
+> The outage reduction should be interpreted as a benefit in the calibrated, non-saturated QoS regime. A threshold sweep shows that the secrecy-rate gain remains stable, whereas outage reduction becomes negligible once the target rate enters a saturated-outage regime.
 
 ## 6. 投稿前建议补充的最小工作
 

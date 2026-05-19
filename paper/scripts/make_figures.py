@@ -256,43 +256,9 @@ def plot_rmin_sweep() -> None:
     savefig("rmin_sweep_stress.pdf")
 
 
-def plot_framework() -> None:
-    fig, ax = plt.subplots(figsize=(7.0, 3.2))
-    ax.axis("off")
-
-    boxes = {
-        "Physical UAV system": (0.04, 0.58, 0.22, 0.22),
-        "Digital twin state": (0.39, 0.58, 0.22, 0.22),
-        "Empirical risk estimator": (0.39, 0.18, 0.22, 0.22),
-        "Joint rollout controller": (0.73, 0.38, 0.23, 0.24),
-        "Actions: sync, motion, power, jamming": (0.04, 0.18, 0.25, 0.22),
-    }
-    for text, (x, y, w, h) in boxes.items():
-        ax.add_patch(
-            plt.Rectangle((x, y), w, h, facecolor="#F2F2F2", edgecolor="black", linewidth=0.8)
-        )
-        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", wrap=True)
-
-    def arrow(start, end, label=None, dy=0.0):
-        ax.annotate("", xy=end, xytext=start, arrowprops=dict(arrowstyle="->", linewidth=1.0))
-        if label:
-            ax.text((start[0] + end[0]) / 2, (start[1] + end[1]) / 2 + dy, label, ha="center", va="center", fontsize=8)
-
-    arrow((0.26, 0.69), (0.39, 0.69), "sensing/sync")
-    arrow((0.50, 0.58), (0.50, 0.40), "age, uncertainty", dy=0.02)
-    arrow((0.61, 0.69), (0.73, 0.52), "twin features")
-    arrow((0.61, 0.29), (0.73, 0.43), "risk slack")
-    arrow((0.73, 0.42), (0.29, 0.29), "selected action", dy=-0.03)
-    arrow((0.16, 0.40), (0.16, 0.58), "execution")
-    arrow((0.29, 0.20), (0.73, 0.38), "candidate set", dy=-0.03)
-    ax.text(0.5, 0.93, "Digital-twin-aware secure UAV control loop", ha="center", fontsize=11, fontweight="bold")
-    savefig("framework_control_loop.pdf")
-
-
 if __name__ == "__main__":
     args = parse_args()
     set_results_dir(args.results_dir)
-    plot_framework()
     plot_main_results()
     plot_risk_estimator_validation()
     plot_stress_strengthening()

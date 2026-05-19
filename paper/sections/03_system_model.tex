@@ -70,7 +70,7 @@ We evaluate policies using five metrics:
     \item runtime per slot, which measures decision-time cost.
 \end{itemize}
 
-The final calibrated stress scenario uses $R_{\min}=1.10$ as its main operating point. This value was chosen after calibration because the earlier threshold made every evaluated method remain in outage, which removed the ability to compare methods by outage probability. Since outage conclusions can depend on this threshold, claims about outage reduction in the stress scenario should be interpreted at the calibrated operating point unless they are accompanied by an explicit $R_{\min}$ sensitivity sweep. The base and hard scenarios retain their configured thresholds and remain useful for testing whether the controller is competitive under different operating regimes.
+The final calibrated stress scenario uses $R_{\min}=1.10$ as its main operating point. This value is treated as a feasible but non-trivial service threshold selected after a pilot feasibility sweep: the earlier threshold made every evaluated method remain in outage, which removed the ability to compare methods by outage probability. It is not used as a method-tuned optimum. Since outage conclusions can depend on this threshold, claims about outage reduction in the stress scenario should be interpreted at the calibrated operating point and checked against the explicit $R_{\min}$ sensitivity sweep. The base and hard scenarios retain their configured thresholds and remain useful for testing whether the controller is competitive under different operating regimes.
 
 \subsection{Twin-induced secrecy loss}
 

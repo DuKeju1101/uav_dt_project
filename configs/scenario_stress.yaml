@@ -62,10 +62,10 @@ channel:
   path_loss_exp: 2.45
   noise_power: 1.0e-06
   xi_legit_interference: 0.21
-  # Calibrated on 2026-05-12. The previous value (2.82) was above the
-  # feasible per-slot secrecy rate in this stress scenario, so every method
-  # had outage_prob = 1.0. A 1.10 target keeps the scenario stressful while
-  # making outage informative for method comparison.
+  # Calibrated on 2026-05-12 from a pilot feasibility sweep. The previous
+  # value (2.82) made every evaluated method remain in outage. This 1.10
+  # target is treated as a feasible but non-trivial service point, with
+  # outage conclusions checked by an explicit R_min sweep.
   r_min: 1.10
   use_probabilistic_los: true
   los_a: 9.61

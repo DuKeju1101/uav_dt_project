@@ -1,579 +1,308 @@
-# 安全感知事件触发同步下的数字孪生驱动 UAV 网络安全通信与轨迹协同优化
+# Digital-Twin-Aware Secure UAV Communication
 
-本项目是一个**纯 Python、纯仿真**的小规模实验框架，严格围绕以下 3 个当前阶段目标：
+本项目是一个纯 Python 仿真与论文复现实验仓库，研究数字孪生状态会老化、同步预算有限、窃听者移动且 UAV 需要联合控制轨迹/功率/干扰时，如何进行安全通信控制。
 
-1. 场景与 baseline 搭建
-2. sync cost、twin quality、secrecy performance 三元耦合基础实验
-3. 安全感知事件触发阈值设计
+当前项目已经从早期 baseline 探索进入论文成稿阶段。主要结果、图表和论文草稿均已整理到 `results/final_2026-05-12/` 与 `paper/`。
 
-> 当前阶段**不依赖 Gazebo、QGroundControl、ROS、相机链路、真机控制**。
-> 你已经安装了 Gazebo/QGC，但在本阶段它们只是“已具备的软件环境”，暂时**不参与实验执行**。
+## 当前状态
 
----
+论文主线已经收束为：
 
-## 1. 目录结构
+1. 建模数字孪生感知的 secure UAV communication control loop。
+2. 用 `rollout_joint` 联合同步、UAV 运动、source power 和 jamming power。
+3. 用 holdout-fitted empirical secrecy-loss risk estimator 量化 twin 不确定性带来的保密损失风险。
+4. 通过 20-seed 主实验、SCA/PPO baseline、消融实验、runtime 分析和 small MDP sanity check 支撑论文结论。
+
+最新论文 PDF：
+
+```bash
+paper/main.pdf
+```
+
+最新结果说明：
+
+```bash
+docs/final_results_2026-05-12.md
+docs/final_results_detailed_analysis_cn.md
+docs/publication_readiness_assessment_cn.md
+```
+
+## 核心结论
+
+最新主表位于：
+
+```bash
+results/final_2026-05-12/scheme_c_readiness_20seed/main_table.csv
+```
+
+20-seed 主实验中，`rollout_joint` 在三个主场景中均提高平均 secrecy-rate。校准后的 stress 场景不再是全 outage；在 `R_min = 1.10` 这个非饱和 QoS operating point 下，主方法同时提升 secrecy-rate 并降低 outage。`R_min` sweep 进一步说明：secrecy-rate gain 在测试阈值上较稳定，但 outage gain 主要集中在非饱和阈值区间，不能泛化为所有 outage target。
+
+| 场景 | rollout_joint secrecy | periodic secrecy | secrecy 增益 | rollout_joint outage | periodic outage | outage 改善 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `paper_base_holdoutfit` | 1.6429 | 1.6115 | +0.0314 | 0.8913 | 0.8913 | 0.0000 |
+| `paper_hard_holdoutfit` | 1.4429 | 1.2803 | +0.1626 | 0.9482 | 0.9496 | +0.0014 |
+| `scenario_stress_holdoutfit` | 1.2540 | 0.9858 | +0.2683 | 0.4294 | 0.6434 | +0.2141 |
+
+Holdout validation cover rate 高于 0.95 目标：
+
+| split | 场景 | cover_rate |
+| --- | --- | ---: |
+| validation | `paper_base` | 0.9873 |
+| validation | `paper_hard` | 1.0000 |
+| validation | `scenario_stress` | 1.0000 |
+| validation | all | 0.9964 |
+
+需要注意：risk estimator / certificate 只能写成 holdout-validated in-policy empirical upper bound，不能写成任意未知环境下的严格安全保证。
+
+## 目录结构
 
 ```text
 uav_dt_project/
-├─ configs/
-│  └─ base.yaml
-├─ env/
-│  ├─ __init__.py
-│  ├─ entities.py
-│  ├─ mobility.py
-│  ├─ channel.py
-│  ├─ twin.py
-│  ├─ sync.py
-│  └─ simulator.py
-├─ policies/
-│  ├─ __init__.py
-│  ├─ greedy_joint.py
-│  └─ decoupled.py
-├─ experiments/
-│  ├─ common.py
-│  ├─ run_baselines.py
-│  ├─ run_coupling.py
-│  └─ run_threshold.py
-├─ analysis/
-│  ├─ metrics.py
-│  └─ plotter.py
+├─ configs/                 # Base, hard, stress and small-MDP scenario configs
+├─ env/                     # Simulator, channel, twin, sync and mobility models
+├─ policies/                # Rule-based, rollout, SCA and PPO policies
+├─ experiments/             # Experiment runners and risk-estimator fitting scripts
+├─ analysis/                # Metrics and plotting helpers
 ├─ results/
+│  ├─ final_2026-05-12/     # Current paper-ready result set
+│  └─ final_2026-05-06/     # Older historical result set
+├─ paper/
+│  ├─ main.tex              # Paper entry
+│  ├─ main.pdf              # Compiled manuscript
+│  ├─ sections/             # Paper sections
+│  ├─ figures/              # Paper figures
+│  └─ scripts/              # Figure generation script
+├─ docs/                    # Chinese project notes and final result analyses
 ├─ requirements.txt
 └─ README.md
 ```
 
----
+## 环境安装
 
-## 2. 环境说明
-
-### 2.1 最小仿真场景
-- 1 个 BS / 边缘服务器
-- 2 架合法 UAV
-  - UAV-1：主服务 UAV
-  - UAV-2：干扰 UAV（jammer）
-- 1 个 Eve
-- 3 个地面用户
-- 2D 平面，固定高度
-- 离散时隙系统
-
-### 2.2 核心思路
-- **真实状态**：用于计算真实 secrecy performance
-- **twin 状态**：用于做同步判断和控制决策
-- **同步动作**：决定是否刷新 twin
-- **控制动作**：决定 UAV 轨迹与功率
-
-### 2.3 当前提供的同步策略
-- `full`
-- `periodic`
-- `aoi_only`
-- `security_risk`
-- `security_margin`
-- `decoupled`
-
----
-
-## 3. 在 WSL Ubuntu 中搭建运行环境
-
-下面步骤都在 **Ubuntu(W Sl)** 终端中执行。
-
-### Step 1：进入自己的工作目录
-
-```bash
-cd ~
-mkdir -p research
-cd research
-```
-
-### Step 2：把项目文件放进该目录
-
-假设你已经把整个 `uav_dt_project` 文件夹复制到这里。
-
-检查：
-
-```bash
-ls
-```
-
-应该能看到：
-
-```bash
-uav_dt_project
-```
-
-### Step 3：进入项目目录
+本项目当前不依赖 Gazebo、QGroundControl、ROS、相机链路或真机控制。实验全部在 Python 仿真器中运行。
 
 ```bash
 cd ~/research/uav_dt_project
-pwd
-```
-
-### Step 4：创建 Python 虚拟环境
-
-```bash
 python3 -m venv .venv
-```
-
-如果报错 `ensurepip is not available`，执行：
-
-```bash
-sudo apt update
-sudo apt install -y python3-venv python3-pip
-python3 -m venv .venv
-```
-
-### Step 5：激活虚拟环境
-
-```bash
 source .venv/bin/activate
-```
-
-激活后终端前面通常会出现：
-
-```bash
-(.venv)
-```
-
-### Step 6：安装依赖
-
-```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Step 7：检查依赖安装是否成功
+检查依赖：
 
 ```bash
 python -c "import numpy, pandas, matplotlib, yaml; print('env ok')"
 ```
 
-如果看到：
+## 主要配置
+
+当前论文使用的主场景：
 
 ```bash
-env ok
+configs/paper_base.yaml
+configs/paper_hard.yaml
+configs/scenario_stress.yaml
 ```
 
-说明环境正常。
-
----
-
-## 4. 用 VS Code 远程打开项目
-
-你已经能用 VS Code 连接 WSL，所以直接按下面做：
-
-### Step 1：在 WSL 终端进入项目目录
+`scenario_stress.yaml` 的 outage threshold 已校准为 `channel.r_min = 1.10`。这个值应表述为来自 pilot feasibility sweep 的可行但非平凡服务阈值，用于避免旧版 `2.82` 造成 all-outage 退化；不要表述为根据 `rollout_joint` 的中位表现调出来的阈值。校准说明见：
 
 ```bash
-cd ~/research/uav_dt_project
+docs/outage_threshold_calibration_2026-05-12.md
 ```
 
-### Step 2：用 VS Code 打开当前目录
+Small MDP sanity check 使用：
 
 ```bash
-code .
+configs/small_mdp_bound_final.yaml
 ```
 
-### Step 3：检查 VS Code 左下角
-你应该看到远程环境类似：
-- `WSL: Ubuntu`
+## 复现实验
 
-### Step 4：在 VS Code 终端中激活环境
-打开 VS Code 内置终端，执行：
+### 1. Holdout risk estimator
+
+项目已有最终输出：
 
 ```bash
-source .venv/bin/activate
+results/final_2026-05-12/scheme_c_holdout/
 ```
 
----
-
-## 5. 第一次运行：先做 baseline
-
-### Step 1：确认当前目录正确
+如需重新拟合，可运行：
 
 ```bash
-cd ~/research/uav_dt_project
-source .venv/bin/activate
+python -m experiments.fit_certificate_holdout \
+  --train-configs configs/base.yaml configs/scenario_hard.yaml \
+  --eval-configs configs/paper_base.yaml configs/paper_hard.yaml configs/scenario_stress.yaml \
+  --train-methods periodic security_risk security_margin rollout_joint \
+  --eval-methods periodic security_risk security_margin rollout_joint \
+  --train-seeds 3 \
+  --train-seed-start 0 \
+  --eval-seeds 1 \
+  --eval-seed-start 100 \
+  --alpha 0.05 \
+  --calibration-ratio 0.2 \
+  --posthoc-calibration-ratio 0.5 \
+  --posthoc-calibration-by-scenario \
+  --outdir results/final_2026-05-12/scheme_c_holdout
 ```
 
-### Step 2：先做冒烟测试（推荐先跑这个）
+### 2. 20-seed 主实验
+
+项目已有最终输出：
 
 ```bash
-python -m experiments.run_baselines --config configs/smoke.yaml --outdir results/baselines_smoke
+results/final_2026-05-12/scheme_c_readiness_20seed/
 ```
 
-### Step 3：再跑正式 baseline
+如需重新跑主表：
 
 ```bash
-python -m experiments.run_baselines
+python -m experiments.run_readiness_multiseed \
+  --configs \
+    results/final_2026-05-12/scheme_c_holdout/configs/paper_base_holdoutfit.yaml \
+    results/final_2026-05-12/scheme_c_holdout/configs/paper_hard_holdoutfit.yaml \
+    results/final_2026-05-12/scheme_c_holdout/configs/scenario_stress_holdoutfit.yaml \
+  --methods periodic security_risk security_margin rollout_joint \
+  --num-seeds 20 \
+  --seed-start 62 \
+  --outdir results/final_2026-05-12/scheme_c_readiness_20seed
 ```
 
-### Step 4：查看输出目录
+### 3. Stress baseline 和消融
+
+统一 holdout-fitted 口径的 stress 补跑结果位于：
 
 ```bash
-ls results/baselines
+results/final_2026-05-12/sca_baselines_5seed_stress_holdoutfit/
+results/final_2026-05-12/drl_ppo_200ep_5seed_stress_holdoutfit/
+results/final_2026-05-12/strengthening_suite_3seed_stress_holdoutfit/
 ```
 
-你应当能看到：
-- 每个方法、每个 seed 的逐时隙 csv
-- `summary_all_methods.csv`
-- `summary_agg_methods.csv`
+这些目录是论文主文优先引用的 baseline / ablation 结果。未带 `holdoutfit` 的 stress 结果主要作为诊断参考。
 
-### Step 5：查看汇总结果
+### 4. R_min sweep
+
+R_min sweep 用于说明 stress threshold 附近的 secrecy-rate gain 和 outage gain，并证明 `R_min = 1.10` 不是唯一支撑点：
 
 ```bash
-python - <<'PY'
-import pandas as pd
-
-df = pd.read_csv('results/baselines/summary_agg_methods.csv')
-print(df)
-PY
+python -m experiments.run_rmin_sweep \
+  --config results/final_2026-05-12/scheme_c_holdout/configs/scenario_stress_holdoutfit.yaml \
+  --outdir results/final_2026-05-12/rmin_sweep_stress
 ```
 
----
-
-## 6. 第二次运行：三元耦合实验
-
-### Step 1：先跑 quick 版本 coupling
+详细协议见：
 
 ```bash
-python -m experiments.run_coupling --config configs/smoke.yaml --quick --outdir results/coupling_quick
+docs/rmin_sweep_protocol.md
 ```
 
-### Step 2：再跑正式 coupling
+## 生成论文图
+
+论文图位于：
 
 ```bash
-python -m experiments.run_coupling
+paper/figures/
 ```
 
-### Step 3：查看结果目录
+生成脚本：
 
 ```bash
-ls results/coupling
+python paper/scripts/make_figures.py --results-dir results/final_2026-05-12
 ```
 
-你应当看到：
-- `coupling_summary.csv`
-- `coupling_summary_agg.csv`
-- `cliff_effect.png`
-- `periodic_vs_twin_quality.png`
-- `periodic_vs_outage.png`
-- `q_vs_rs.png`
-- `pareto_sync_vs_secrecy.png`
-- `tfscc.csv`
-- `tfscc_vs_eve_speed.png`
-
-### Step 4：打开图片
-在 WSL 中可以先用 VS Code 文件浏览器直接点开。
-
----
-
-## 7. 第三次运行：安全感知阈值实验
-
-### Step 1：运行 threshold 扫描
+注意：当前 `paper/sections/01_introduction.tex` 使用的是人工替换后的框架图：
 
 ```bash
-python -m experiments.run_threshold
+paper/figures/dt_uav_joint_sync_secure_control_loop.pdf
 ```
 
-### Step 3：查看结果目录
+`paper/scripts/make_figures.py` 已不再生成 Figure 1，避免重新运行脚本时误生成旧版 `framework_control_loop.pdf`。
+
+## 编译论文
+
+本地编译：
 
 ```bash
-ls results/threshold
+cd paper
+latexmk -pdf main.tex
 ```
 
-你应当看到：
-- `threshold_summary.csv`
-- `threshold_summary_agg.csv`
-- `threshold_vs_secrecy.png`
-- `threshold_vs_outage.png`
-- `threshold_pareto.png`
-
----
-
-## 8. 你应该如何理解这些代码文件
-
-### `env/simulator.py`
-核心环境文件。
-
-负责：
-- 维护 UAV、Eve、Twin 状态
-- 执行一步 `step()`
-- 计算真实 secrecy rate 和 twin quality
-- 记录实验日志
-
-### `env/twin.py`
-Twin 更新逻辑。
-
-负责：
-- 初始化 twin
-- 同步时刷新 twin
-- 不同步时按运动模型预测 twin
-- 维护 AoI 和不确定性
-
-### `env/sync.py`
-同步策略定义。
-
-负责：
-- Full Sync
-- Periodic Sync
-- AoI-only Trigger
-- Security Risk Trigger
-- Security Margin Trigger
-
-### `policies/greedy_joint.py`
-当前阶段的联合控制器。
-
-负责：
-- 枚举 UAV 轨迹动作 + 功率动作
-- 基于 twin 预测 secrecy rate
-- 选择当前时隙的最佳动作
-
-### `policies/decoupled.py`
-解耦 baseline。
-
-负责：
-- 先固定同步规则
-- 再单独优化轨迹与功率
-
-### `experiments/run_baselines.py`
-跑各个 baseline。
-
-### `experiments/run_coupling.py`
-跑三元耦合实验。
-
-### `experiments/run_threshold.py`
-跑阈值设计对比实验。
-
----
-
-## 9. 如何修改关键参数
-
-所有主要参数都在：
-
-```text
-configs/base.yaml
-```
-
-### 9.1 修改 episode 长度
-
-```yaml
-episode_length: 200
-```
-
-### 9.2 修改同步预算
-
-```yaml
-sync:
-  budget: 80
-```
-
-### 9.3 修改 periodic baseline 周期
-
-```yaml
-sync:
-  periodic_k: 4
-```
-
-### 9.4 修改 AoI 阈值
-
-```yaml
-sync:
-  aoi_threshold: 6
-```
-
-### 9.5 修改安全感知阈值
-
-```yaml
-sync:
-  tau0: 0.52
-  rho: 0.05
-```
-
-### 9.6 修改 Eve 运动速度
-
-```yaml
-eve:
-  velocity: [-2.0, -1.0]
-```
-
-### 9.7 修改轨迹步长
-
-```yaml
-control:
-  step_size: 10.0
-```
-
----
-
-## 10. 推荐你的实际实验顺序
-
-### 第 1 阶段：只跑 baseline
-按顺序跑：
+若不用 `latexmk`，可按顺序运行：
 
 ```bash
-python -m experiments.run_baselines
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
 ```
 
-看：
-- Full Sync 是否最好
-- Periodic / AoI-only 是否明显下降
-- Decoupled 是否弱于 Joint
-
-### 第 2 阶段：跑三元耦合
+编译说明见：
 
 ```bash
-python -m experiments.run_coupling
+paper/README_compile_cn.md
 ```
 
-重点看：
-- 是否出现 cliff effect
-- Twin quality 下降时 secrecy rate 是否快速恶化
-- TFSCC 是否随 Eve 速度变大
+## 关键代码
 
-### 第 3 阶段：跑阈值设计
+- `env/simulator.py`：核心仿真器，执行时隙推进、secrecy/outage 计算和指标记录。
+- `env/twin.py`：数字孪生状态预测、同步更新、AoI 和不确定性维护。
+- `env/sync.py`：同步策略和 secrecy-loss risk / certificate 相关计算。
+- `policies/rollout_joint.py`：论文主方法，联合选择同步、运动、source power 和 jamming power。
+- `policies/sca_baseline.py`：SCA baseline。
+- `policies/ppo_baseline.py`：轻量 PPO diagnostic baseline。
+- `experiments/fit_certificate_holdout.py`：holdout-fitted empirical risk estimator。
+- `experiments/run_readiness_multiseed.py`：多 seed 主表。
+- `experiments/run_sca_baselines.py`：SCA baseline。
+- `experiments/run_drl_ppo_baseline.py`：PPO baseline。
+- `experiments/run_strengthening_suite.py`：baseline 完整性和消融实验。
+- `experiments/run_small_mdp_bound.py`：small exact-DP sanity check。
+
+## 结果口径
+
+当前论文应优先引用：
 
 ```bash
-python -m experiments.run_threshold
+results/final_2026-05-12/
 ```
 
-重点看：
-- Security-aware 是否优于 AoI-only
-- 在近似 sync cost 下，是否能降低 outage
+其中：
 
----
+- `scheme_c_readiness_20seed/` 是主表。
+- `scheme_c_holdout/` 是 risk estimator / certificate 拟合和验证结果。
+- `sca_baselines_5seed_stress_holdoutfit/`、`drl_ppo_200ep_5seed_stress_holdoutfit/`、`strengthening_suite_3seed_stress_holdoutfit/` 是统一口径 stress baseline 和消融。
+- `rmin_sweep_stress/` 是 threshold sweep，用于约束 outage claim 的适用范围。
+- `small_mdp_bound/` 是 sanity check。
 
-## 11. Gazebo 和 QGroundControl 在这里如何处理
-
-你已经装好了 Gazebo 和 QGroundControl，但**当前阶段不要接入**。
-
-原因：
-- 你当前题目是 **安全感知事件触发同步 + 数字孪生 + 安全通信 + 轨迹协同优化**
-- 当前阶段目标是 **纯仿真 baseline、三元耦合、阈值设计**
-- Gazebo/QGC/ROS/视觉链路会显著增加工程复杂度，但对当前论文主线没有直接收益
-
-因此建议：
-- **保留 Gazebo/QGC 安装状态即可**
-- **本阶段所有实验只在 Python 项目里完成**
-
----
-
-## 12. 在 VS Code 中如何使用 Codex（建议工作流）
-
-### 推荐工作流 A：用 Codex 生成局部改动
-适合：
-- 补参数扫描
-- 加新图
-- 改 reward
-- 增加一个 baseline
-
-建议你在打开本项目后，对 Codex 下这样的任务：
-
-```text
-阅读当前项目结构。
-不要改动核心场景设定。
-请在 experiments/run_threshold.py 中新增一个对 sigma_growth 的扫描实验，
-并把结果保存到 results/threshold_sigma/ 下。
-要求保持现有代码风格。
-```
-
-### 推荐工作流 B：用 Codex 做代码审查
-适合：
-- 检查逻辑错误
-- 看是否有重复代码
-- 补类型注解
-
-示例提示词：
-
-```text
-请审查当前项目，重点检查：
-1. twin 状态更新是否自洽；
-2. security_margin 阈值是否真的比 AoI-only 更有针对性；
-3. 是否有可提取的公共函数。
-不要大改结构，只给出最小修改方案并直接修改代码。
-```
-
-### 推荐工作流 C：用 Codex 生成单个新增模块
-适合：
-- 加 trajectory 可视化
-- 加灵敏度分析
-- 加结果汇总脚本
-
-示例提示词：
-
-```text
-请新增 analysis/trajectory_plot.py。
-功能：读取 results/baselines/slot_security_margin_seed*.csv，
-画出 UAV-1、UAV-2、Eve 的二维轨迹图。
-输出到 results/plots/trajectory_security_margin.png。
-不要修改其他文件。
-```
-
-### 不推荐你现在让 Codex 做的事
-- 不要让它一次性大改所有文件
-- 不要直接让它把系统扩展到 ROS/Gazebo
-- 不要让它自行发散到真实无人机控制
-- 不要让它同时改环境、策略、实验、画图所有模块
-
-建议你始终采用：
-- **一次只下一个清晰任务**
-- **先看 diff，再接受修改**
-- **先让它改小文件，再改核心文件**
-
----
-
-## 13. 常见问题排查
-
-### 问题 1：`No module named experiments`
-在项目根目录运行：
+以下目录是旧结果或诊断结果，不能作为当前论文主口径：
 
 ```bash
-cd ~/research/uav_dt_project
-python -m experiments.run_baselines
+results/final_2026-05-06/
+results/final_2026-05-12/sca_baselines_5seed_stress/
+results/final_2026-05-12/drl_ppo_200ep_5seed_stress/
+results/final_2026-05-12/strengthening_suite_3seed_stress/
 ```
 
-不要在 `experiments/` 子目录里直接运行。
+## 论文写作注意事项
 
-### 问题 2：matplotlib 无法显示图片
-这是正常的，因为脚本默认是保存 png，不是弹窗显示。
+建议论文贡献写成四点：
 
-直接去 `results/...` 目录查看图片文件即可。
+1. Digital-twin-aware secure UAV joint synchronization and control framework。
+2. Empirical-risk-aware joint rollout controller。
+3. Holdout-fitted secrecy-loss risk estimator。
+4. Multi-seed validation with baselines, ablations, runtime analysis and small exact-DP sanity check。
 
-### 问题 3：运行太慢
-先把 `configs/base.yaml` 里的：
+需要主动承认的边界：
 
-```yaml
-num_seeds: 10
-episode_length: 200
+1. `rollout_joint` 运行时间较高，约 1.2 到 1.3 seconds/slot，适合 edge-assisted planning 或 moderate-timescale control，不应声称轻量实时。
+2. Risk estimator 是 empirical / in-policy，不是 universal out-of-distribution safety guarantee。
+3. PPO baseline 是 200-episode lightweight diagnostic，不代表所有 DRL 方法的上限。
+
+## Git 状态建议
+
+大型实验输出和 PDF 已纳入仓库，便于论文复现。若后续继续跑实验，建议新结果统一放入带日期的目录，例如：
+
+```bash
+results/final_YYYY-MM-DD/<experiment_name>/
 ```
 
-改小成：
-
-```yaml
-num_seeds: 3
-episode_length: 80
-```
-
-先跑通，再恢复。
-
-### 问题 4：想固定 Eve 不动
-把：
-
-```yaml
-eve:
-  velocity: [0.0, 0.0]
-```
-
----
-
-## 14. 你的下一步建议
-
-你现在最稳的实际操作顺序是：
-
-1. 在 WSL 中创建 venv 并安装依赖
-2. 用 VS Code Remote 打开项目
-3. 先运行 `python -m experiments.run_baselines`
-4. 看 `results/baselines/summary_agg_methods.csv`
-5. 再运行 `python -m experiments.run_coupling`
-6. 再运行 `python -m experiments.run_threshold`
-7. 最后再考虑让 Codex 帮你做“局部增强”而不是“整体重写”
-
-只要你先把这 3 类实验跑通，项目就已经从“方案阶段”进入“可验证实验阶段”了。
+不要把虚拟环境、Python 缓存或临时 IDE 文件提交到仓库。
