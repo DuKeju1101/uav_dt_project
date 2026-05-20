@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  19 MAY 2026 17:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  20 MAY 2026 18:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1381,7 +1381,7 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 
 Overfull \vbox (49.76738pt too high) has occurred while \output is active []
 
- [1{/home/dkj/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-t1.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathex.enc}
+ [1{/home/dkj/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-t1.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathex.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc}
 
 \openout4 = `main.pag'.
 
@@ -1424,7 +1424,7 @@ Underfull \hbox (badness 2418) in paragraph at lines 8--9
 []\T1/stix2/m/n/9.03374 Digital twins are in-creas-ingly dis-cussed as en-ablers for au-
  []
 
-<figures/dt_uav_joint_sync_secure_control_loop.pdf, id=53, 489.0812pt x 226.2051pt>
+<figures/dt_uav_joint_sync_secure_control_loop.pdf, id=55, 489.0812pt x 226.2051pt>
 File: figures/dt_uav_joint_sync_secure_control_loop.pdf Graphic file (type pdf)
 <use figures/dt_uav_joint_sync_secure_control_loop.pdf>
 Package pdftex.def Info: figures/dt_uav_joint_sync_secure_control_loop.pdf  used on input line 14.
@@ -1449,7 +1449,7 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 
 [2
 
-{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc}]
+]
 Underfull \hbox (badness 1442) in paragraph at lines 17--18
 []\T1/stix2/m/n/9.03374 These works mo-ti-vate our use of tra-jec-tory, trans-mit power,
  []
@@ -1866,9 +1866,9 @@ Here is how much of TeX's memory you used:
  64611 multiletter control sequences out of 15000+600000
  857594 words of font info for 262 fonts, out of 8000000 for 9000
  62 hyphenation exceptions out of 8191
- 113i,10n,122p,2319b,703s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 113i,10n,122p,2370b,703s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Math.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Bold.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb>
-Output written on main.pdf (12 pages, 1018204 bytes).
+Output written on main.pdf (12 pages, 1018254 bytes).
 PDF statistics:
  599 PDF objects out of 1000 (max. 8388607)
  434 compressed objects within 5 object streams

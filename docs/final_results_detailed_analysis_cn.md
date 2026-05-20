@@ -134,7 +134,7 @@
 
 这个场景适合说明：
 
-- `rollout_joint` 不仅提高 secrecy-rate，还能明显降低 outage。
+- `rollout_joint` 不仅提高 secrecy-rate，在校准非饱和 stress 阈值下 outage 也有明显下降。
 - 同步、数字孪生、前瞻控制的耦合价值在高压力场景最清楚。
 
 ## 4. 主实验结果分析
@@ -385,7 +385,7 @@ PPO 的推理速度很快，但当前训练预算下性能明显弱于 `periodic
 可以这样组织实验叙事：
 
 1. 先用 20-seed 主表说明 `rollout_joint` 在三个场景中稳定提高 secrecy-rate。
-2. 再强调校准后的 stress 场景：同时提升 secrecy-rate 和降低 outage，这是最强结果。
+2. 再强调校准后的 stress 场景：在非饱和阈值下实现 secrecy-rate 提升与 outage 下降，这是最强结果（阈值变高后 outage 改善消失）。
 3. 用 holdout 证书结果说明 certificate 是保守且经过验证的。
 4. 用 PPO/SCA baseline 说明简单学习 baseline 和局部优化 baseline 在压力场景下不足。
 5. 用 strengthening suite 说明 twin、同步和联合前瞻控制都不可缺。
@@ -403,7 +403,7 @@ PPO 的推理速度很快，但当前训练预算下性能明显弱于 `periodic
 
 更稳妥的写法是：
 
-1. `rollout_joint` 在主实验中稳定提高 secrecy-rate，并在校准后的 stress 场景显著降低 outage。
+1. `rollout_joint` 在主实验中稳定提高 secrecy-rate，并在校准后的 stress 场景的非饱和阈值区间取得显著 outage 降幅。
 2. holdout-fitted certificate 在验证轨迹上达到目标覆盖率，可作为 in-policy 保守风险估计。
 3. PPO baseline 在当前训练预算下弱于模型驱动方法。
 4. small MDP exact-DP 结果用于 sanity check，不直接参与主场景数值比较。

@@ -539,6 +539,8 @@ INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/tfm/public/stix2-type1/t1-stix2text-it
 INPUT /home/dkj/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map
 INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-t1.enc
 INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathex.enc
+INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc
+INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc
 OUTPUT main.pag
 INPUT ./figures/dt_uav_joint_sync_secure_control_loop.pdf
 INPUT ./figures/dt_uav_joint_sync_secure_control_loop.pdf
@@ -594,8 +596,6 @@ INPUT ./sections/02_related_work.tex
 INPUT ./sections/02_related_work.tex
 INPUT ./sections/02_related_work.tex
 INPUT sections/02_related_work.tex
-INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathit.enc
-INPUT /home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm.enc
 INPUT ./sections/03_system_model.tex
 INPUT ./sections/03_system_model.tex
 INPUT ./sections/03_system_model.tex

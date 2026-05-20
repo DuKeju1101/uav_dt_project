@@ -369,7 +369,7 @@ Conclusion 简洁总结：
 
 1. 本文研究数字孪生不确定性下的 UAV 安全通信；
 2. 提出 joint rollout + certificate；
-3. stress 场景下同时提升 secrecy-rate 和降低 outage；
+3. 校准非饱和 stress 阈值下实现 secrecy-rate 提升与 outage 下降；
 4. 后续工作是加速 rollout、增强 certificate 泛化、训练更强 DRL baseline。
 
 ## 9. 第七步：让 Codex 写 Introduction 和 Abstract

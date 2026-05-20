@@ -107,6 +107,22 @@ docs/rmin_sweep_protocol.md
 
 ## 5. 最近关键更新记录
 
+### 2026-05-20: Abstract 阈值限定与 docs 旧口径清理
+
+完成事项：
+
+1. 在 abstract 的 stress outage 数字后补充 `at the calibrated stress threshold $R_{\min}=1.10$`，避免 `0.6434 \to 0.4294` 被误读为无阈值条件的全局结论。
+2. 清理两个对外辅助文档中的旧强口径，把 stress outage 改善统一限定到校准非饱和阈值或非饱和阈值区间。
+3. 保持实验数字不变，只收窄文字表述。
+
+相关文件：
+
+```bash
+paper/main.tex
+docs/codex_desktop_paper_workflow_cn.md
+docs/final_results_detailed_analysis_cn.md
+```
+
 ### 2026-05-19: Figure 1 替换与论文重编译
 
 完成事项：
@@ -186,14 +202,14 @@ README.md
 paper/main.pdf
 ```
 
-仍需注意：
+本轮已清理：
 
 ```bash
 docs/final_results_detailed_analysis_cn.md
 docs/codex_desktop_paper_workflow_cn.md
 ```
 
-这两个辅助文档中仍有少量旧式强口径表述，后续建议统一改成“校准非饱和阈值下 outage 改善”。
+这两个辅助文档中的旧式强口径表述已统一改成“校准非饱和阈值/非饱和阈值区间下 outage 改善”。
 
 ## 6. 代码演变记录
 
