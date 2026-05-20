@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  20 MAY 2026 18:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  20 MAY 2026 19:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1291,12 +1291,12 @@ Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/
 (epstopdf)                    date: 2025-02-04 03:23:07
 (epstopdf)                    size: 10191 bytes
 (epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/Wiley_logo.eps>
-(epstopdf)             \includegraphics on input line 52.
+(epstopdf)             \includegraphics on input line 51.
 Package epstopdf Info: Output file is already uptodate.
 <ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf, id=7, 611.28375pt x 127.47626pt>
 File: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf Graphic file (type pdf)
 <use ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf  used on input line 52.
+Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf  used on input line 51.
 (pdftex.def)             Requested size: 75.3998pt x 15.72246pt.
 Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/allergy.eps>
 (epstopdf)                    date: 2025-02-04 03:23:05
@@ -1305,12 +1305,12 @@ Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/
 (epstopdf)                    date: 2026-05-16 12:35:31
 (epstopdf)                    size: 32417 bytes
 (epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/allergy.eps>
-(epstopdf)             \includegraphics on input line 52.
+(epstopdf)             \includegraphics on input line 51.
 Package epstopdf Info: Output file is already uptodate.
 <ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf, id=8, 159.59625pt x 33.12375pt>
 File: ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf Graphic file (type pdf)
 <use ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf  used on input line 52.
+Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf  used on input line 51.
 (pdftex.def)             Requested size: 159.33542pt x 33.06956pt.
 Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/openaccess.eps>
 (epstopdf)                    date: 2025-02-04 03:23:06
@@ -1319,54 +1319,54 @@ Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/
 (epstopdf)                    date: 2025-02-04 03:23:06
 (epstopdf)                    size: 14007 bytes
 (epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/openaccess.eps>
-(epstopdf)             \includegraphics on input line 52.
+(epstopdf)             \includegraphics on input line 51.
 Package epstopdf Info: Output file is already uptodate.
 <ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf, id=9, 52.195pt x 12.045pt>
 File: ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf Graphic file (type pdf)
 <use ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf  used on input line 52.
+Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf  used on input line 51.
 (pdftex.def)             Requested size: 50.58878pt x 11.67497pt.
-LaTeX Font Info:    Trying to load font information for LS1+stix2scr on input line 52.
+LaTeX Font Info:    Trying to load font information for LS1+stix2scr on input line 51.
 (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2scr.fd
 File: ls1stix2scr.fd 2018/04/02 v2.0.0-latex stix2 script LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2ex on input line 52.
+LaTeX Font Info:    Trying to load font information for LS2+stix2ex on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2ex.fd
 File: ls2stix2ex.fd 2018/04/02 v2.0.0-latex stix2 extentions LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2frak on input line 52.
+LaTeX Font Info:    Trying to load font information for LS1+stix2frak on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2frak.fd
 File: ls1stix2frak.fd 2018/04/02 v2.0.0-latex stix2 fraktur LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2bb on input line 52.
+LaTeX Font Info:    Trying to load font information for LS1+stix2bb on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2bb.fd
 File: ls1stix2bb.fd 2018/04/02 v2.0.0-latex stix2 blackboard LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2cal on input line 52.
+LaTeX Font Info:    Trying to load font information for LS2+stix2cal on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2cal.fd
 File: ls2stix2cal.fd 2018/04/02 v2.0.0-latex stix2 calligraphic LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2sf on input line 52.
+LaTeX Font Info:    Trying to load font information for LS1+stix2sf on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2sf.fd
 File: ls1stix2sf.fd 2018/04/02 v2.0.0-latex stix2 sans-serif LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2tt on input line 52.
+LaTeX Font Info:    Trying to load font information for LS2+stix2tt on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2tt.fd
 File: ls2stix2tt.fd 2018/04/02 v2.0.0-latex stix2 typewriter LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 52.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/home/dkj/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 52.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 51.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/home/dkj/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 52.
+LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 51.
  (./sections/01_introduction.tex
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -1802,7 +1802,7 @@ Underfull \hbox (badness 1331) in paragraph at lines 6--7
  []
 
 )
-Underfull \hbox (badness 2809) in paragraph at lines 75--76
+Underfull \hbox (badness 2809) in paragraph at lines 74--75
 \T1/stix2/m/n/9.03374 in this manuscript are de-rived from the re-sult files un-der
  []
 
@@ -1868,7 +1868,7 @@ Here is how much of TeX's memory you used:
  62 hyphenation exceptions out of 8191
  113i,10n,122p,2370b,703s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Math.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Bold.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb>
-Output written on main.pdf (12 pages, 1018254 bytes).
+Output written on main.pdf (12 pages, 1018264 bytes).
 PDF statistics:
  599 PDF objects out of 1000 (max. 8388607)
  434 compressed objects within 5 object streams
