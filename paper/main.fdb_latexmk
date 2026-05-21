@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1779277197.87004 "main.aux" "main.bbl" "main" 1779277685.76357 0
-  "./refs.bib" 1778905020.23517 11522 495aa97a4b865cfc67c564fa1106eaa8 ""
+["bibtex main"] 1779354362.03704 "main.aux" "main.bbl" "main" 1779354362.96628 0
+  "./refs.bib" 1779353509.07716 10880 cbe76e3dd0baf9d7d05d3a3e166fa30c ""
   "./wileyNJD-Chicago.bst" 1778906489.88923 26641 0621f28a5e32b59ea9c385ba548f369d ""
-  "main.aux" 1779277685.59854 28876 f862c604dba7a7e163e03792f7f7fac6 "pdflatex"
+  "main.aux" 1779354362.81686 28875 0825d9ece51056babf2a9ea8ad3daf62 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1779277684.62721 "main.tex" "main.pdf" "main" 1779277685.7638 0
+["pdflatex"] 1779354362.05242 "main.tex" "main.pdf" "main" 1779354362.96651 0
   "/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathbb.enc" 1610747736 2904 e0faa515d685129700e18ca6e0e2b48f ""
   "/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathcal.enc" 1610747736 3356 2818ff063f8b5d0d850e1203330b9fda ""
   "/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathex.enc" 1610747736 3374 7b7c21d9493820ef4980dfa6fd22840f ""
@@ -49,6 +49,8 @@
   "/home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb" 1610747736 488859 eef0537386f91adfe99058f359ceedc6 ""
   "/home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb" 1610747736 452561 61eccfe7853019df7c3d332e353ab0f8 ""
   "/home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb" 1610747736 526217 45f43131563c350dac0de98a3a4109a9 ""
+  "/home/dkj/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb" 1136849748 35941 f27169cc74234d5bd5e4cca5abafaabb ""
+  "/home/dkj/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb" 1136849748 44648 23115b2a545ebfe2c526c3ca99db8b95 ""
   "/home/dkj/.TinyTeX/texmf-dist/tex/generic/babel-english/english.ldf" 1496785618 7008 9ff5fdcc865b01beca2b0fe4a46231d4 ""
   "/home/dkj/.TinyTeX/texmf-dist/tex/generic/babel/babel.sty" 1777840490 147591 eecf9e5f6f3925da9eea9278a5249126 ""
   "/home/dkj/.TinyTeX/texmf-dist/tex/generic/babel/locale/en/babel-en.ini" 1763931111 3936 fef897bbcfe8e9d18c93a3d2d53cf9d8 ""
@@ -247,7 +249,7 @@
   "/home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk" 1778906152.25949 17436 5072b303ce8c4b4e2290ca307fc43ba4 ""
   "/home/dkj/.TinyTeX/texmf-var/web2c/pdftex/pdflatex.fmt" 1778905852 2295995 db29a1835b403b99e7f3dcc6bf29b92f ""
   "/home/dkj/.TinyTeX/texmf.cnf" 1778905432.28909 637 edd806fb06a89761a6034e1968af9017 ""
-  "figures/dt_uav_joint_sync_secure_control_loop.pdf" 1779172327.24907 3867 a559a2e0ff568d743970409714f82ec3 ""
+  "figures/dt_uav_joint_sync_secure_control_loop.pdf" 1779351839.1746 21319 6bac420f570d916c0def70cdfe3832f6 ""
   "figures/main_results_secrecy_outage.pdf" 1778913147.72048 14047 abb41e8b2ddcd79241fef26c00c635e8 ""
   "figures/ppo_training_curve.pdf" 1778913148.22282 14372 394030c98f445007e0e00d76de0e30fe ""
   "figures/risk_estimator_validation.pdf" 1778913147.89648 12060 fc090edab19b47a61426551407081cb7 ""
@@ -256,14 +258,12 @@
   "figures/stress_strengthening_suite.pdf" 1778913148.08715 13457 c8f84f31b14e65f74d40e06603b8c24e ""
   "ijcs_template/Optimal-Design-layout/LETTERSP.STY" 1738610589 12163 b6de1fa5e93e58dc68ba3c77a1af2e61 ""
   "ijcs_template/Optimal-Design-layout/NJDnatbib.sty" 1738610590 46229 b23b408004050376b05f17f766e34127 ""
-  "ijcs_template/Optimal-Design-layout/USG.cls" 1749077183 95431 0244fdb94a6bc18f048db962c353f564 ""
+  "ijcs_template/Optimal-Design-layout/USG.cls" 1779353509.07716 95509 8134c09b09f6df695201228a75e16c94 ""
   "ijcs_template/Optimal-Design-layout/algorithm.sty" 1738610589 3250 ec924db429a99ca4ed9c3769acfa5f18 ""
   "ijcs_template/Optimal-Design-layout/images/Wiley_logo.eps" 1738610587 413570 ef0fb6bc9fa87a993ec36489549c55eb ""
-  "ijcs_template/Optimal-Design-layout/images/allergy.eps" 1738610585 1473554 5474cdf595b147e9b4c229b7a46fb2dc ""
-  "ijcs_template/Optimal-Design-layout/images/openaccess.eps" 1738610586 1230946 a908289c03b32c6490d7d4f2594739db ""
-  "main.aux" 1779277685.59854 28876 f862c604dba7a7e163e03792f7f7fac6 "pdflatex"
-  "main.bbl" 1779277197.87577 11251 7a8c0e9ccb7ba9bfe8823e4dd95def5b "bibtex main"
-  "main.tex" 1779277673.9862 4873 998f2aab96027b1c7168df28d2015fae ""
+  "main.aux" 1779354362.81686 28875 0825d9ece51056babf2a9ea8ad3daf62 "pdflatex"
+  "main.bbl" 1779354362.04286 11293 faccf0ea36e6e9027558eb14f5883458 "bibtex main"
+  "main.tex" 1779354353.87086 3986 3f2a8b5b2ff53a35914800674e1eae3e ""
   "sections/01_introduction.tex" 1779182889.49473 6931 8a64963eb9ea5a1d1175037b1fae588f ""
   "sections/02_related_work.tex" 1778913125.29881 7957 064a8c8fd214db8cac651d1b0a495c0a ""
   "sections/03_system_model.tex" 1779182666.89796 6537 40d81e33f1eead1cd597f973638cf04f ""

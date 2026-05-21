@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  20 MAY 2026 19:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.16)  21 MAY 2026 17:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1291,84 +1291,61 @@ Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/
 (epstopdf)                    date: 2025-02-04 03:23:07
 (epstopdf)                    size: 10191 bytes
 (epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/Wiley_logo.eps>
-(epstopdf)             \includegraphics on input line 51.
+(epstopdf)             \includegraphics on input line 49.
 Package epstopdf Info: Output file is already uptodate.
 <ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf, id=7, 611.28375pt x 127.47626pt>
 File: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf Graphic file (type pdf)
 <use ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf  used on input line 51.
+Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf  used on input line 49.
 (pdftex.def)             Requested size: 75.3998pt x 15.72246pt.
-Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/allergy.eps>
-(epstopdf)                    date: 2025-02-04 03:23:05
-(epstopdf)                    size: 1473554 bytes
-(epstopdf)             Output file: <ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf>
-(epstopdf)                    date: 2026-05-16 12:35:31
-(epstopdf)                    size: 32417 bytes
-(epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/allergy.eps>
-(epstopdf)             \includegraphics on input line 51.
-Package epstopdf Info: Output file is already uptodate.
-<ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf, id=8, 159.59625pt x 33.12375pt>
-File: ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf Graphic file (type pdf)
-<use ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf  used on input line 51.
-(pdftex.def)             Requested size: 159.33542pt x 33.06956pt.
-Package epstopdf Info: Source file: <ijcs_template/Optimal-Design-layout/images/openaccess.eps>
-(epstopdf)                    date: 2025-02-04 03:23:06
-(epstopdf)                    size: 1230946 bytes
-(epstopdf)             Output file: <ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf>
-(epstopdf)                    date: 2025-02-04 03:23:06
-(epstopdf)                    size: 14007 bytes
-(epstopdf)             Command: <repstopdf --outfile=ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf ijcs_template/Optimal-Design-layout/images/openaccess.eps>
-(epstopdf)             \includegraphics on input line 51.
-Package epstopdf Info: Output file is already uptodate.
-<ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf, id=9, 52.195pt x 12.045pt>
-File: ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf Graphic file (type pdf)
-<use ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf>
-Package pdftex.def Info: ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf  used on input line 51.
-(pdftex.def)             Requested size: 50.58878pt x 11.67497pt.
-LaTeX Font Info:    Trying to load font information for LS1+stix2scr on input line 51.
+LaTeX Font Info:    Trying to load font information for LS1+stix2scr on input line 49.
 (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2scr.fd
 File: ls1stix2scr.fd 2018/04/02 v2.0.0-latex stix2 script LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2ex on input line 51.
+LaTeX Font Info:    Trying to load font information for LS2+stix2ex on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2ex.fd
 File: ls2stix2ex.fd 2018/04/02 v2.0.0-latex stix2 extentions LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2frak on input line 51.
+LaTeX Font Info:    Trying to load font information for LS1+stix2frak on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2frak.fd
 File: ls1stix2frak.fd 2018/04/02 v2.0.0-latex stix2 fraktur LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2bb on input line 51.
+LaTeX Font Info:    Trying to load font information for LS1+stix2bb on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2bb.fd
 File: ls1stix2bb.fd 2018/04/02 v2.0.0-latex stix2 blackboard LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2cal on input line 51.
+LaTeX Font Info:    Trying to load font information for LS2+stix2cal on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2cal.fd
 File: ls2stix2cal.fd 2018/04/02 v2.0.0-latex stix2 calligraphic LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS1+stix2sf on input line 51.
+LaTeX Font Info:    Trying to load font information for LS1+stix2sf on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls1stix2sf.fd
 File: ls1stix2sf.fd 2018/04/02 v2.0.0-latex stix2 sans-serif LS1 font definitions
 )
-LaTeX Font Info:    Trying to load font information for LS2+stix2tt on input line 51.
+LaTeX Font Info:    Trying to load font information for LS2+stix2tt on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/stix2-type1/ls2stix2tt.fd
 File: ls2stix2tt.fd 2018/04/02 v2.0.0-latex stix2 typewriter LS2 font definitions
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 51.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/home/dkj/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 51.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 49.
  (/home/dkj/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/home/dkj/.TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 51.
+LaTeX Font Info:    Calculating math sizes for size <7.5> on input line 49.
  (./sections/01_introduction.tex
 Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \hbox (badness 2418) in paragraph at lines 8--9
+[]\T1/stix2/m/n/9.03374 Digital twins are in-creas-ingly dis-cussed as en-ablers for au-
+ []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1386,7 +1363,7 @@ Overfull \vbox (49.76738pt too high) has occurred while \output is active []
 \openout4 = `main.pag'.
 
 
- <./ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf> <./ijcs_template/Optimal-Design-layout/images/allergy-eps-converted-to.pdf> <./ijcs_template/Optimal-Design-layout/images/openaccess-eps-converted-to.pdf>]
+ <./ijcs_template/Optimal-Design-layout/images/Wiley_logo-eps-converted-to.pdf>]
 *geometry* verbose mode - [ newgeometry ] result:
 * driver: pdftex
 * paper: custom
@@ -1419,12 +1396,7 @@ Overfull \vbox (49.76738pt too high) has occurred while \output is active []
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-
-Underfull \hbox (badness 2418) in paragraph at lines 8--9
-[]\T1/stix2/m/n/9.03374 Digital twins are in-creas-ingly dis-cussed as en-ablers for au-
- []
-
-<figures/dt_uav_joint_sync_secure_control_loop.pdf, id=55, 489.0812pt x 226.2051pt>
+<figures/dt_uav_joint_sync_secure_control_loop.pdf, id=45, 489.0812pt x 226.2051pt>
 File: figures/dt_uav_joint_sync_secure_control_loop.pdf Graphic file (type pdf)
 <use figures/dt_uav_joint_sync_secure_control_loop.pdf>
 Package pdftex.def Info: figures/dt_uav_joint_sync_secure_control_loop.pdf  used on input line 14.
@@ -1438,10 +1410,10 @@ Underfull \hbox (badness 1132) in paragraph at lines 21--22
 \T1/stix2/m/n/9.03374 ments, source power lev-els, and jam-ming power lev-els, and
  []
 
+LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 28.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-LaTeX Font Info:    Calculating math sizes for size <9.03374> on input line 28.
 ) (./sections/02_related_work.tex
 Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
@@ -1483,7 +1455,7 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
-[4{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathcal.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm-bold.enc}]
+[4{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathcal.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathrm-bold.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathbb.enc}]
 Underfull \hbox (badness 10000) in paragraph at lines 68--69
  []\T1/stix2/m/n/9.03374 average syn-chro-niza-tion cost, which mea-sures
  []
@@ -1514,6 +1486,9 @@ Underfull \hbox (badness 3148) in paragraph at lines 8--9
  []
 
 
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Underfull \hbox (badness 1242) in paragraph at lines 26--28
 \T1/stix2/m/n/9.03374 where $\LS1/stix2/m/it/9.03374 c[]$ \T1/stix2/m/n/9.03374 is de-ter-mined on held-out cal-i-bra-tion traces. The
  []
@@ -1523,12 +1498,6 @@ Underfull \hbox (badness 1019) in paragraph at lines 26--28
 \T1/stix2/m/n/9.03374 the claim made here is de-lib-er-ately nar-rower than a for-mal
  []
 
-
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[5{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathbb.enc}{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathsf.enc}]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 57.
 
 Underfull \hbox (badness 10000) in paragraph at lines 60--61
@@ -1568,6 +1537,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 69--70
  []
 
 
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[5{/home/dkj/.TinyTeX/texmf-dist/fonts/enc/dvips/stix2-type1/stix2-mathsf.enc}]
 Underfull \hbox (badness 1377) in paragraph at lines 77--78
 \T1/stix2/m/n/9.03374 in-ex-pen-sive. \T1/cmtt/m/n/9 security_risk \T1/stix2/m/n/9.03374 trig-gers syn-chro-niza-tion with a
  []
@@ -1603,6 +1577,9 @@ Underfull \hbox (badness 1137) in paragraph at lines 81--82
  []
 
 ) (./sections/05_experiments.tex
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 6--7
 \T1/stix2/m/n/9.03374 All nu-mer-i-cal re-sults re-ported in this section are gen-
  []
@@ -1638,16 +1615,17 @@ Underfull \hbox (badness 1859) in paragraph at lines 12--13
  []
 
 
+Underfull \hbox (badness 10000) detected at line 22
+[]
+ []
+
+
 Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
 [6]
-Underfull \hbox (badness 10000) detected at line 22
-[]
- []
-
-<figures/main_results_secrecy_outage.pdf, id=200, 505.2545pt x 192.30846pt>
+<figures/main_results_secrecy_outage.pdf, id=199, 505.2545pt x 192.30846pt>
 File: figures/main_results_secrecy_outage.pdf Graphic file (type pdf)
 <use figures/main_results_secrecy_outage.pdf>
 Package pdftex.def Info: figures/main_results_secrecy_outage.pdf  used on input line 51.
@@ -1672,12 +1650,12 @@ Underfull \hbox (badness 7595) in paragraph at lines 60--61
 \T1/stix2/m/n/9.03374 a de-gen-er-ate all-outage regime, we also sweep $\LS1/stix2/m/it/9.03374 R[] \LS1/stix2/m/n/9.03374 Ë
  []
 
-<figures/rmin_sweep_stress.pdf, id=202, 500.0946pt x 195.97015pt>
+<figures/rmin_sweep_stress.pdf, id=201, 500.0946pt x 195.97015pt>
 File: figures/rmin_sweep_stress.pdf Graphic file (type pdf)
 <use figures/rmin_sweep_stress.pdf>
 Package pdftex.def Info: figures/rmin_sweep_stress.pdf  used on input line 64.
 (pdftex.def)             Requested size: 445.68645pt x 174.65808pt.
-<figures/risk_estimator_validation.pdf, id=205, 354.98372pt x 198.2411pt>
+<figures/risk_estimator_validation.pdf, id=204, 354.98372pt x 198.2411pt>
 File: figures/risk_estimator_validation.pdf Graphic file (type pdf)
 <use figures/risk_estimator_validation.pdf>
 Package pdftex.def Info: figures/risk_estimator_validation.pdf  used on input line 91.
@@ -1686,6 +1664,9 @@ Package pdftex.def Info: figures/risk_estimator_validation.pdf  used on input li
 Underfull \hbox (badness 1147) in paragraph at lines 96--97
 \T1/stix2/m/n/9.03374 dis-tri-bu-tions, not as de-cou-pled out-of-distribution gen-er-al-iza-
  []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Underfull \hbox (badness 10000) detected at line 104
@@ -1697,7 +1678,7 @@ Underfull \hbox (badness 1237) in paragraph at lines 118--119
 []\T1/stix2/m/n/9.03374 We sep-a-rately re-port a lightweight PPO di-ag-nos-tic run. The
  []
 
-<figures/ppo_training_curve.pdf, id=208, 370.05565pt x 189.97852pt>
+<figures/ppo_training_curve.pdf, id=207, 370.05565pt x 189.97852pt>
 File: figures/ppo_training_curve.pdf Graphic file (type pdf)
 <use figures/ppo_training_curve.pdf>
 Package pdftex.def Info: figures/ppo_training_curve.pdf  used on input line 122.
@@ -1722,12 +1703,12 @@ Underfull \hbox (badness 10000) detected at line 133
 []
  []
 
-<figures/stress_strengthening_suite.pdf, id=211, 514.89238pt x 226.42969pt>
+<figures/stress_strengthening_suite.pdf, id=210, 514.89238pt x 226.42969pt>
 File: figures/stress_strengthening_suite.pdf Graphic file (type pdf)
 <use figures/stress_strengthening_suite.pdf>
 Package pdftex.def Info: figures/stress_strengthening_suite.pdf  used on input line 153.
 (pdftex.def)             Requested size: 486.2041pt x 213.81824pt.
-<figures/small_mdp_trace.pdf, id=213, 471.29701pt x 197.3851pt>
+<figures/small_mdp_trace.pdf, id=212, 471.29701pt x 197.3851pt>
 File: figures/small_mdp_trace.pdf Graphic file (type pdf)
 <use figures/small_mdp_trace.pdf>
 Package pdftex.def Info: figures/small_mdp_trace.pdf  used on input line 164.
@@ -1784,6 +1765,16 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
+Overfull \hbox (261.76537pt too wide) has occurred while \output is active
+[]| 
+ []
+
+[9 <./figures/rmin_sweep_stress.pdf> <./figures/risk_estimator_validation.pdf> <./figures/ppo_training_curve.pdf>]) (./sections/07_conclusion.tex
+Underfull \hbox (badness 1331) in paragraph at lines 6--7
+[]\T1/stix2/m/n/9.03374 The fi-nal re-sults sup-port the value of joint synchronization-
+ []
+
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
@@ -1791,18 +1782,8 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
 []| 
  []
 
-[9 <./figures/rmin_sweep_stress.pdf> <./figures/risk_estimator_validation.pdf> <./figures/ppo_training_curve.pdf>]) (./sections/07_conclusion.tex
-Overfull \hbox (261.76537pt too wide) has occurred while \output is active
-[]| 
- []
-
-[10 <./figures/stress_strengthening_suite.pdf> <./figures/small_mdp_trace.pdf>]
-Underfull \hbox (badness 1331) in paragraph at lines 6--7
-[]\T1/stix2/m/n/9.03374 The fi-nal re-sults sup-port the value of joint synchronization-
- []
-
-)
-Underfull \hbox (badness 2809) in paragraph at lines 74--75
+[10 <./figures/stress_strengthening_suite.pdf> <./figures/small_mdp_trace.pdf>])
+Underfull \hbox (badness 2809) in paragraph at lines 63--64
 \T1/stix2/m/n/9.03374 in this manuscript are de-rived from the re-sult files un-der
  []
 
@@ -1814,8 +1795,68 @@ Underfull \hbox (badness 3128) in paragraph at lines 15--19
  []
 
 
+Underfull \hbox (badness 1038) in paragraph at lines 33--37
+\T1/stix2/m/n/8.5 ca-tions.  \T1/stix2/m/it/8.5 IEEE Trans-ac-tions on Ve-hic-u-lar Tech-nol-ogy\T1/stix2/m/n/8.5 , 73(4):
+ []
+
+
+Underfull \hbox (badness 2205) in paragraph at lines 75--79
+\T1/stix2/m/n/8.5 Na, and Tariq S. Dur-rani.  Se-cure rate max-i-miza-tion for
+ []
+
+
+Underfull \hbox (badness 1609) in paragraph at lines 87--91
+\T1/stix2/m/n/8.5 En-ergy con-sump-tion min-i-miza-tion in se-cure multi-antenna
+ []
+
+
+Underfull \hbox (badness 1527) in paragraph at lines 87--91
+\T1/stix2/m/it/8.5 Trans-ac-tions on Wire-less Com-mu-ni-ca-tions\T1/stix2/m/n/8.5 , 22(11):7185--7200,
+ []
+
+
+Underfull \hbox (badness 1400) in paragraph at lines 99--103
+\T1/stix2/m/it/8.5 Com-mu-ni-ca-tions Sur-veys & Tu-to-ri-als\T1/stix2/m/n/8.5 , 21(3):2334--2360, 2019.
+ []
+
+
 Underfull \hbox (badness 8000) in paragraph at lines 105--109
 \T1/stix2/m/n/8.5 Pas-cal Lorenz, Mo-hammed Atiquz-za-man, and Ab-bas Ja-
+ []
+
+
+Underfull \hbox (badness 1371) in paragraph at lines 116--120
+\T1/stix2/m/n/8.5 Changchun Gao.  Aerial co-op-er-a-tive jam-ming for cellular-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 134--138
+[]\T1/stix2/m/n/8.5 Zhiqiang Wei, Fan Liu, Chang Liu, Zai Yang, Der-rick
+ []
+
+
+Underfull \hbox (badness 5533) in paragraph at lines 134--138
+\T1/stix2/m/n/8.5 Wing Kwan Ng, and Robert Schober.  In-te-grated sens-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 134--138
+\T1/stix2/m/n/8.5 ing, nav-i-ga-tion, and com-mu-ni-ca-tion for se-cure UAV
+ []
+
+
+Underfull \hbox (badness 1603) in paragraph at lines 134--138
+\T1/stix2/m/n/8.5 net-works with a mo-bile eaves-drop-per.  \T1/stix2/m/it/8.5 IEEE Trans-ac-tions
+ []
+
+
+Underfull \hbox (badness 2790) in paragraph at lines 134--138
+\T1/stix2/m/it/8.5 on Wire-less Com-mu-ni-ca-tions\T1/stix2/m/n/8.5 , 23(7):7060--7078, 2024.  doi:
+ []
+
+
+Underfull \hbox (badness 1681) in paragraph at lines 146--150
+[]\T1/stix2/m/n/8.5 Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang
  []
 
 
@@ -1827,21 +1868,6 @@ Overfull \hbox (261.76537pt too wide) has occurred while \output is active
  []
 
 [11]
-Underfull \hbox (badness 1371) in paragraph at lines 116--120
-\T1/stix2/m/n/8.5 Changchun Gao.  Aerial co-op-er-a-tive jam-ming for cellular-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 134--138
-[]\T1/stix2/m/n/8.5 Zhiqiang Wei, Fan Liu, Chang Liu, Zai Yang, Der-rick
- []
-
-
-Underfull \hbox (badness 1681) in paragraph at lines 146--150
-[]\T1/stix2/m/n/8.5 Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang
- []
-
-
 Underfull \hbox (badness 1681) in paragraph at lines 152--156
 []\T1/stix2/m/n/8.5 Zhaohui Yang, Mingzhe Chen, Yuchen Liu, and Zhaoyang
  []
@@ -1860,18 +1886,18 @@ L3 programming layer <2026-04-28>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 36529 strings out of 469288
- 663267 string characters out of 5465295
- 1075682 words of memory out of 5000000
- 64611 multiletter control sequences out of 15000+600000
+ 36478 strings out of 469288
+ 661291 string characters out of 5465295
+ 1075556 words of memory out of 5000000
+ 64560 multiletter control sequences out of 15000+600000
  857594 words of font info for 262 fonts, out of 8000000 for 9000
  62 hyphenation exceptions out of 8191
- 113i,10n,122p,2370b,703s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Math.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Bold.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb>
-Output written on main.pdf (12 pages, 1018264 bytes).
+ 113i,10n,122p,1909b,702s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/dkj/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.602pk></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Math.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Bold.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-BoldItalic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Italic.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/public/stix2-type1/STIX2Text-Regular.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></home/dkj/.TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
+Output written on main.pdf (12 pages, 993665 bytes).
 PDF statistics:
- 599 PDF objects out of 1000 (max. 8388607)
+ 597 PDF objects out of 1000 (max. 8388607)
  434 compressed objects within 5 object streams
  107 named destinations out of 1000 (max. 500000)
- 11615 words of extra memory for PDF output out of 12000 (max. 10000000)
+ 11605 words of extra memory for PDF output out of 12000 (max. 10000000)
 

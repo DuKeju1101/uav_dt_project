@@ -1048,8 +1048,6 @@ Volume\ \@jvol, Article ID\ \@artid, \thepage~pages\par%
     \arttypefont\bf%
     \uppercase{\letterspace to 1.15\naturalwidth{\@articletype}}%
   }%
-  \hskip -2\@p@t%
-  \raisebox{-2\@p@t}{\includegraphics[width=0.70in]{images/openaccess}}%
 }%
 
 \def\articletype#1{\gdef\@articletype{#1}}%
@@ -1293,9 +1291,9 @@ Volume\ \@jvol, Article ID\ \@artid, \thepage~pages\par%
 
 \def\historydates#1{\gdef\@history@dates{#1}}%
 \historydates{{\FIfont%\titlepageheadfont%
-  \ifx\@received\@empty\@dummy@received\else\@dummy@received\authorsep\fi%
-  \ifx\@revised\@empty\@dummy@revised\else\@dummy@revised\authorsep\fi%
-  \ifx\@accepted\@empty\@dummy@accepted\else\@dummy@accepted\fi%
+  \ifx\@received\@empty\else\@dummy@received\fi%
+  \ifx\@revised\@empty\else\ifx\@received\@empty\else\authorsep\fi\@dummy@revised\fi%
+  \ifx\@accepted\@empty\else\ifx\@received\@empty\ifx\@revised\@empty\else\authorsep\fi\else\authorsep\fi\@dummy@accepted\fi%
 %  \ifx\@pubdate\@empty\@dummy@pubdate\else\@pubdate\fi%
 }}%
 %
@@ -1338,9 +1336,13 @@ Volume\ \@jvol, Article ID\ \@artid, \thepage~pages\par%
       \vskip-20\@p@t%
       {%
         \fontsize{7}{8}\selectfont%
-         {\it \@journal}, \@copyyear;v\@volume:\@FirstPg--\@LastPg%
-		 \\[-20pt]
-		 \href{https://doi.org/\thearticledoi}{https://doi.org/\thearticledoi}
+         \def\zero@volume{0}%
+         {\it \@journal}, \@copyyear%
+         \ifx\@volume\empty\else%
+           \ifx\@volume\zero@volume\else;v\@volume:\@FirstPg--\@LastPg\fi%
+         \fi%
+			 \ifx\thearticledoi\empty\else\\[-20pt]
+			 \href{https://doi.org/\thearticledoi}{https://doi.org/\thearticledoi}\fi
         \hfill%
         %wileyonlinelibrary.com/journal/%
         %\hfill%
@@ -1481,7 +1483,11 @@ Volume\ \@jvol, Article ID\ \@artid, \thepage~pages\par%
   \removelastskip\vskip10\@p@t%
   \ifx\@corresinfo\empty\else{\reset@font\FIfont\textbf{Correspondence:~}\@corresinfo\par}\fi%
   \removelastskip\vskip4.25\@p@t%\@history@dates
-  \ifx\@history@dates\empty\else{\@history@dates\par}\fi%
+  \ifx\@received\@empty%
+    \ifx\@revised\@empty%
+      \ifx\@accepted\@empty\else{\@history@dates\par}\fi%
+    \else{\@history@dates\par}\fi%
+  \else{\@history@dates\par}\fi%
   \removelastskip\vskip4.25\@p@t%
   \ifx\@editorinfo\empty\else{\reset@font\FIfont\@editorinfo\par}\fi%
   %\ifx\@presentaddress\empty\else{\@presentaddress\par}\fi%
@@ -1579,8 +1585,6 @@ Volume\ \@jvol, Article ID\ \@artid, \thepage~pages\par%
 %%
     \node[anchor=north east,inner sep=0mm]
     (LOG) at ([yshift=0mm]current page header area.north east){\includegraphics[width=26.5mm]{Wiley_logo.eps}};
-    \node[anchor=north east,inner sep=0mm]
-    (LOG1) at ([yshift=-11.75mm]current page header area.north east){\includegraphics[width=56mm]{allergy.eps}};
 %
 \end{tikzpicture}
   \hsize=\textwidth\parindent=0\@p@t%

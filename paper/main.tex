@@ -20,7 +20,7 @@
 \revised{}
 \accepted{}
 \journal{International Journal of Communication Systems}
-\volume{0}
+\volume{}
 \copyyear{2026}
 \startpage{1}
 \articledoi{}
@@ -41,12 +41,10 @@
 
 \corres{Qianli Di (\email{diqianli@nuaa.edu.cn})}
 
-\fundingInfo{Funding information will be inserted here.}
-
 \keywords{UAV communication | digital twin | physical-layer security | secrecy outage | synchronization control | rollout control}
 \transkeywords{UAV communication | digital twin | physical-layer security | secrecy outage | synchronization control | rollout control}
 
-\abstract[ABSTRACT]{Secure unmanned aerial vehicle (UAV) communication must often be performed with imperfect knowledge of mobile eavesdroppers. Digital twins provide a natural mechanism for maintaining such state information, but synchronization consumes communication resources and stale twins can mislead trajectory, power, and jamming decisions. This paper studies a digital-twin-aware secure UAV communication system with two cooperative UAVs, multiple ground users, a mobile eavesdropper, and budget-limited twin synchronization. We formulate a joint synchronization and control problem and propose an empirical-risk-aware rollout controller that jointly selects synchronization bandwidth, UAV motion, source power, and cooperative jamming power. To quantify the risk caused by twin uncertainty, we fit a secrecy-loss risk estimator with a train/calibration/validation separation and use its slack in the control score. Multi-seed simulations are conducted on base, hard, and calibrated stress scenarios. The gains are regime-dependent: relative to fixed periodic synchronization, the base scenario shows a modest secrecy-rate increase of 0.0314 with unchanged outage, the hard scenario improves secrecy rate by 0.1626 with nearly unchanged outage, and the 20-seed stress scenario improves secrecy rate from 0.9858 to 1.2540 while reducing outage from 0.6434 to 0.4294 at the calibrated stress threshold $R_{\min}=1.10$. A stress-threshold sweep confirms that the secrecy-rate gain is stable across the tested outage thresholds, while outage reduction is concentrated in the non-saturated threshold range. Empirical holdout cover rates for the fitted upper bound are 0.9873, 1.0000, and 1.0000 for the base, hard, and stress groups, respectively. Additional holdout-fitted stress experiments show that the proposed method outperforms SCA-based baselines, no-twin rollout, no-synchronization rollout, and fixed-period rollout, while remaining below an oracle-state upper reference. A lightweight 200-episode PPO run is included only as a diagnostic learning baseline and is not treated as a tuned DRL comparison. The results indicate that secrecy-aware digital-twin synchronization should be optimized jointly with communication control, although the current rollout implementation incurs substantially higher per-slot runtime than rule-based baselines.}
+\abstract[ABSTRACT]{Secure unmanned aerial vehicle (UAV) communication often operates with imperfect knowledge of mobile eavesdroppers. Digital twins can maintain such state information, but synchronization consumes resources and stale twins may mislead trajectory, power, and jamming decisions. This paper studies a digital-twin-aware secure UAV communication system with two cooperative UAVs, multiple ground users, a mobile eavesdropper, and budget-limited twin synchronization. We formulate a joint synchronization-control problem and propose an empirical-risk-aware rollout controller that jointly selects synchronization bandwidth, UAV motion, source power, and cooperative jamming power. To quantify risk from twin uncertainty, we fit a secrecy-loss risk estimator with train/calibration/validation separation and use its slack in the rollout score. Multi-seed simulations are conducted on base, hard, and calibrated stress scenarios. The gains are regime-dependent: compared with fixed periodic synchronization, the base scenario yields a modest secrecy-rate increase of 0.0314 with unchanged outage, the hard scenario improves secrecy rate by 0.1626 with nearly unchanged outage, and the 20-seed stress scenario improves secrecy rate from 0.9858 to 1.2540 while reducing outage from 0.6434 to 0.4294 at the calibrated stress threshold $R_{\min}=1.10$. A stress-threshold sweep shows stable secrecy-rate gains, while outage reduction is concentrated in the non-saturated threshold range. Holdout cover rates for the fitted upper bound are 0.9873, 1.0000, and 1.0000 for the base, hard, and stress groups. Additional stress experiments show that the proposed method outperforms SCA-based, no-twin, no-synchronization, and fixed-periodic baselines, while remaining below an oracle-state upper reference. The current implementation is more computationally expensive than rule-based baselines.}
 
 \maketitle
 
@@ -58,16 +56,7 @@
 \input{sections/06_discussion}
 \input{sections/07_conclusion}
 
-\bmsubsection*{Author Contributions}
-The author contribution statement will be completed before submission.
-
-\bmsubsection*{Acknowledgments}
-The authors thank the developers and maintainers of the simulation tools used in this study. Detailed funding and institutional acknowledgments will be completed before submission.
-
-\bmsubsection*{Financial Disclosure}
-None reported.
-
-\bmsubsection*{Conflicts of Interest}
+\bmsubsection*{Conflict of Interest Statement}
 The authors declare no conflicts of interest.
 
 \bmsubsection*{Data Availability Statement}
